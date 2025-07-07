@@ -7,6 +7,7 @@ import judamov.sipoh.mappers.GroupMapper;
 import judamov.sipoh.mappers.ScheduleMapper;
 import judamov.sipoh.repository.*;
 import judamov.sipoh.service.interfaces.IGroupService;
+import judamov.sipoh.service.interfaces.IScheduleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ public class GroupServiceImpl implements IGroupService {
     private final ISubjectRepository subjectRepository;
     private final ISemesterRepository semesterRepository;
     private final IScheduleRepository scheduleRepository;
-    private final ScheduleServiceImpl scheduleService;
+    private final IScheduleService scheduleService;
 
     /**
      * Obtiene todos los grupos de un semestre específico.
@@ -136,12 +137,29 @@ public class GroupServiceImpl implements IGroupService {
         Group savedGroup = groupRepository.save(group);
         ScheduleCreateDTO scheduleCreateDTO = new ScheduleCreateDTO(
                 savedGroup.getId(),
+                null,
                 dto.getScheduleList()
         );
         scheduleService.createSchedule(scheduleCreateDTO,adminId);
         return true;
     }
+    @Override
+    public Boolean updateDocente(Long groupId,Long idDocente, Long adminId){
+        validateAdminAccess(adminId);
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Grupo no encontrado"));
+        User newDocente = userRepository.findById(idDocente)
+                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Docente no encontrado"));
 
+        group.setDocente(newDocente);
+        try{
+            groupRepository.save(group);
+        }catch (Exception e){
+            throw  new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR, "Error al actualizar el docente en el grupo "+ group.getCode());
+        }
+        groupRepository.save(group);
+        return true;
+    }
     /**
      * Actualiza un grupo existente.
      *
@@ -163,12 +181,21 @@ public class GroupServiceImpl implements IGroupService {
         Semester semester = semesterRepository.findById(semesterId)
                 .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Semestre no encontrado"));
 
-        User user = (dto.getIdDocente() != null) ? getUserById(dto.getIdDocente()) : null;
+        User docente = (dto.getIdDocente() != null) ? getUserById(dto.getIdDocente()) : null;
+
+
+        if(!dto.getScheduleList().isEmpty()){
+            ScheduleCreateDTO scheduleCreateDTO=ScheduleCreateDTO.builder()
+                    .idGroup(groupId)
+                    .scheduleList(dto.getScheduleList())
+                    .build();
+            scheduleService.createSchedule(scheduleCreateDTO,adminId);
+        }
 
         group.setCode(dto.getCode());
         group.setSemester(semester);
         group.setSubject(subject);
-        group.setDocente(user);
+        group.setDocente(docente);
 
         groupRepository.save(group);
         return true;

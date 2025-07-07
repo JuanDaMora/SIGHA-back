@@ -10,19 +10,34 @@ import judamov.sipoh.exceptions.GenericAppException;
 import judamov.sipoh.repository.IGroupRepository;
 import judamov.sipoh.repository.IScheduleRepository;
 import judamov.sipoh.repository.IUserRepository;
+import judamov.sipoh.service.interfaces.IGroupService;
 import judamov.sipoh.service.interfaces.IScheduleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class ScheduleServiceImpl implements IScheduleService {
     private final IScheduleRepository scheduleRepository;
     private final UserRolServiceImpl userRolService;
     private final IUserRepository userRepository;
     private final IGroupRepository groupRepository;
+    private final IGroupService groupService;
+
+    public ScheduleServiceImpl(
+            IScheduleRepository scheduleRepository,
+            UserRolServiceImpl userRolService,
+            IUserRepository userRepository,
+            IGroupRepository groupRepository,
+            @Lazy IGroupService groupService) {
+        this.scheduleRepository = scheduleRepository;
+        this.userRolService = userRolService;
+        this.userRepository = userRepository;
+        this.groupRepository = groupRepository;
+        this.groupService = groupService;
+    }
     @Override
     @Transactional
     public List<ScheduleDTO> createSchedule(ScheduleCreateDTO dto, Long adminId) {
@@ -46,7 +61,9 @@ public class ScheduleServiceImpl implements IScheduleService {
                 }).toList();
 
         List<Schedule> savedSchedules = scheduleRepository.saveAll(schedulesToSave);
-
+        if((dto.getIdDocente() != null)){
+            groupService.updateDocente(dto.getIdGroup(), dto.getIdDocente(), adminId);
+        }
         // Devolver la lista con IDs ya persistidos
         return savedSchedules.stream()
                 .map(s -> new ScheduleDTO(s.getId(), s.getStartTime().getHour(), s.getDay()))
