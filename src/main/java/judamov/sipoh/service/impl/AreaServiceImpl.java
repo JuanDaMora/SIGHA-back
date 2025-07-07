@@ -38,7 +38,13 @@ public class AreaServiceImpl  implements IAreaService {
                 .map(entry -> {
                     Area area = entry.getKey();
                     List<SubjectDTO> subjectDTOs = entry.getValue().stream()
-                            .map(subject -> new SubjectDTO(subject.getId(), subject.getName()))
+                            .map(subject -> SubjectDTO.builder()
+                                    .id(subject.getId())
+                                    .name(subject.getName())
+                                    .code(subject.getCodigo())
+                                    .idLevel(subject.getLevelSubject().getId())
+                                    .level(subject.getLevelSubject().getDescription())
+                                    .build())
                             .toList();
 
                     return AreaSubjectDTO.builder()

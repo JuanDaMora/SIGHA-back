@@ -8,14 +8,14 @@ import judamov.sipoh.entity.Group;
 import java.util.List;
 
 public interface IGroupService {
-    List<GroupDTO> getAllBySemester(Long idSemester, Long adminId);
+    List<GroupDTO> getAllBySemester(Long adminId, Long semesterId);
 
-    List<GroupDTO> getAllByLevels(List<Long> idLevel, Long adminId);
+    List<GroupDTO> getAllByLevels(List<Long> idLevel, Long adminId, Long semesterId);
 
-    List<GroupDTO> getAllBySubject(Long idSubject, Long adminId);
-    List<GroupDTO> getAllByDocente(Long idUser, Long adminId);
+    List<GroupDTO> getAllBySubject(Long subjectId, Long adminId, Long semesterId);
+    List<GroupDTO> getAllByDocente(Long docenteId, Long adminId, Long semesterId);
 
-    GroupDTO createGroup(GroupCreateDTO dto, Long adminId);
-    GroupDTO updateGroup(Long groupId, GroupUpdateDTO dto, Long adminId);
+    Boolean createGroup(GroupCreateDTO dto, Long adminId,Long semesterId);
+    Boolean updateGroup(Long groupId, GroupUpdateDTO dto, Long adminId, Long semesterId);
 
 }

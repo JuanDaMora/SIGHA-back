@@ -3,7 +3,7 @@ package judamov.sipoh.controllers;
 import judamov.sipoh.dto.GroupCreateDTO;
 import judamov.sipoh.dto.GroupDTO;
 import judamov.sipoh.dto.GroupUpdateDTO;
-import judamov.sipoh.service.interfaces.IGroupService;
+import judamov.sipoh.service.impl.GroupServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,58 +11,68 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/groups")
 @RequiredArgsConstructor
+@RequestMapping("/api/v1/group")
 public class GroupController {
 
-    private final IGroupService groupService;
+    private final GroupServiceImpl groupService;
 
     @GetMapping("/by-semesters")
     public ResponseEntity<List<GroupDTO>> getAllBySemesters(
-            @RequestParam Long idSemester,
+            @RequestHeader Long semesterId,
             @RequestHeader Long userId) {
-        List<GroupDTO> groups = groupService.getAllBySemester(idSemester, userId);
+        List<GroupDTO> groups = groupService.getAllBySemester(userId, semesterId);
         return ResponseEntity.ok(groups);
     }
 
     @GetMapping("/by-levels")
     public ResponseEntity<List<GroupDTO>> getAllByLevels(
             @RequestParam List<Long> idLevels,
+            @RequestHeader Long semesterId,
             @RequestHeader Long userId) {
-        List<GroupDTO> groups = groupService.getAllByLevels(idLevels, userId);
+        List<GroupDTO> groups = groupService.getAllByLevels(idLevels, userId, semesterId);
         return ResponseEntity.ok(groups);
     }
 
     @GetMapping("/by-subject")
     public ResponseEntity<List<GroupDTO>> getAllBySubject(
-            @RequestParam Long idSubject,
+            @RequestParam Long subjectId,
+            @RequestHeader Long semesterId,
             @RequestHeader Long userId) {
-        List<GroupDTO> groups = groupService.getAllBySubject(idSubject, userId);
+        List<GroupDTO> groups = groupService.getAllBySubject(subjectId, userId, semesterId);
         return ResponseEntity.ok(groups);
     }
 
     @GetMapping("/by-docente")
     public ResponseEntity<List<GroupDTO>> getAllByDocente(
-            @RequestParam Long idDocente,
+            @RequestParam Long docenteId,
+            @RequestHeader Long semesterId,
             @RequestHeader Long userId) {
-        List<GroupDTO> groups = groupService.getAllByDocente(idDocente, userId);
+        List<GroupDTO> groups = groupService.getAllByDocente(docenteId, userId, semesterId);
         return ResponseEntity.ok(groups);
     }
 
     @PutMapping("/{groupId}")
-    public ResponseEntity<GroupDTO> updateGroup(
+    public ResponseEntity<Boolean> updateGroup(
             @PathVariable Long groupId,
+            @RequestHeader Long semesterId,
             @RequestBody GroupUpdateDTO dto,
             @RequestHeader Long userId) {
-        GroupDTO updated = groupService.updateGroup(groupId, dto, userId);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok( groupService.updateGroup(groupId, dto, userId, semesterId));
     }
     @PostMapping
-    public ResponseEntity<GroupDTO> createGroup(
+    public ResponseEntity<Boolean> createGroup(
             @RequestBody GroupCreateDTO dto,
+            @RequestHeader Long semesterId,
             @RequestHeader Long userId) {
-        GroupDTO created = groupService.createGroup(dto, userId);
-        return ResponseEntity.status(201).body(created);
+        return ResponseEntity.ok(groupService.createGroup(dto, userId, semesterId));
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Boolean> deleteGroup(
+            @PathVariable Long id,
+            @RequestHeader Long userId
+    ){
+        return ResponseEntity.ok(groupService.deleteGroup(id,userId));
     }
 
 }

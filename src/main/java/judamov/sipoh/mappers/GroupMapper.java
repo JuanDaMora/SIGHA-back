@@ -13,18 +13,16 @@ public class GroupMapper {
 
         return GroupDTO.builder()
                 .id(group.getId())
-                .name(group.getName())
+                .code(group.getCode())
                 .idSemestre(group.getSemester() != null ? group.getSemester().getId() : null)
                 .idSubject(group.getSubject() != null ? group.getSubject().getId() : null)
-                .idUser(group.getUser() != null ? group.getUser().getId() : null)
+                .idDocente(group.getDocente() != null ? group.getDocente().getId() : null)
                 .idLevel(group.getSubject() != null && group.getSubject().getLevelSubject() != null
                         ? group.getSubject().getLevelSubject().getId()
                         : null)
                 .levelName(group.getSubject() != null && group.getSubject().getLevelSubject() != null
                         ? group.getSubject().getLevelSubject().getDescription()
                         : null)
-                .dayOfWeek(group.getDayOfWeek())
-                .hour(group.getStartTime() != null ? group.getStartTime().getHour() : null)
                 .build();
     }
 

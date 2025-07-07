@@ -1,18 +1,14 @@
 package judamov.sipoh.dto;
-
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SubjectDTO {
-    Long id;
-    String name;
-    Long idLevel;
-    String level;
-    String code;
+public class ScheduleCreateDTO {
+    private Long idGroup;
+    private List<ScheduleDTO> scheduleList;
 }

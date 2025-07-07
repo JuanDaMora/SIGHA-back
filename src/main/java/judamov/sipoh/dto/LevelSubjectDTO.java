@@ -9,10 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SubjectDTO {
-    Long id;
-    String name;
-    Long idLevel;
-    String level;
-    String code;
+public class LevelSubjectDTO {
+    private Long id;
+    private String name;
 }

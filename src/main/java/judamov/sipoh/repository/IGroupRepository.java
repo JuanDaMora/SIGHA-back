@@ -12,9 +12,11 @@ import java.util.Optional;
 
 @Repository
 public interface IGroupRepository extends JpaRepository<Group, Long> {
-    Optional<List<Group>> findBySemester(Semester semester);
+    List<Group> findBySemester(Semester semester);
 
-    Optional<List<Group>> findBySubject(Subject subject);
+    Optional<List<Group>> findBySubjectAndSemester(Subject subject, Semester semester);
 
-    Optional<List<Group>> findByUser(User user);
+    Optional<List<Group>> findByDocenteAndSemester (User docente, Semester semester);
+
+    Optional<Group> findByCode(String code);
 }
