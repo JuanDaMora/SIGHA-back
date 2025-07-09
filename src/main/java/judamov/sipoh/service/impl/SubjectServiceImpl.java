@@ -40,7 +40,6 @@ public class SubjectServiceImpl implements ISubjectService {
                 .codigo(subjectCreateDTO.getCode())
                 .levelSubject(levelSubject)
                 .area(area)
-                .max_students(subjectCreateDTO.getMaxStudents())
                 .name(subjectCreateDTO.getName())
                 .build();
         try{

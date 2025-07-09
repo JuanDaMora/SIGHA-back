@@ -38,6 +38,12 @@ public class Group {
     @Column(name="code", nullable = false)
     String code;
 
+    @Column(name= "max_capacity")
+    String max_students;
+
+    @Column(name = "enrolled")
+    String enrolled;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

@@ -364,7 +364,7 @@ public class AuthServiceImpl {
         return true;
     }
     @Transactional
-    public Boolean registerBulkUsers(Long userId, List<BulkUserDTO> usuariosDTO) {
+    public Boolean registerBulkUsers(Long userId, List<BulkUserDTO> usuariosDTO, Boolean isFakeEmail) {
         User admin = userRepository.findOneById(userId)
                 .orElseThrow(() -> new GenericAppException(HttpStatus.UNAUTHORIZED, "Usuario no autenticado"));
 
@@ -432,15 +432,17 @@ public class AuthServiceImpl {
                     .lastLogin(new Date())
                     .build());
 
-            EmailRequestDTO emailRequest = EmailRequestDTO.builder()
-                    .nombre(dto.getFirstName() + " " + dto.getLastName())
-                    .documento(documentoLimpio)
-                    .email(user.getEmail())
-                    .password(plainPassword)
-                    .fake(true)
-                    .build();
+                EmailRequestDTO emailRequest = EmailRequestDTO.builder()
+                        .nombre(dto.getFirstName() + " " + dto.getLastName())
+                        .documento(documentoLimpio)
+                        .email(user.getEmail())
+                        .password(plainPassword)
+                        .fake(isFakeEmail)
+                        .build();
 
-            emailService.sendEmail(emailRequest);
+                emailService.sendEmail(emailRequest);
+
+
         }
 
         return true;

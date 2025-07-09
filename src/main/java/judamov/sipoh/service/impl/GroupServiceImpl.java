@@ -69,7 +69,7 @@ public class GroupServiceImpl implements IGroupService {
     /**
      * Obtiene todos los grupos de una materia específica.
      *
-     * @param idSubject ID de la materia.
+     * @param subjectId ID de la materia.
      * @param adminId   ID del administrador que hace la consulta.
      * @return Lista de DTOs con horarios incluidos.
      */
@@ -91,7 +91,7 @@ public class GroupServiceImpl implements IGroupService {
     /**
      * Obtiene todos los grupos asignados a un docente específico.
      *
-     * @param idUser  ID del docente.
+     * @param docenteId  ID del docente.
      * @param adminId ID del administrador que hace la consulta.
      * @return Lista de DTOs con horarios incluidos.
      */
@@ -133,6 +133,9 @@ public class GroupServiceImpl implements IGroupService {
         group.setSemester(semester);
         group.setSubject(subject);
         group.setDocente(user);
+        group.setMax_students(dto.getMax_students());
+        group.setEnrolled(dto.getEnrolled());
+
 
         Group savedGroup = groupRepository.save(group);
         ScheduleCreateDTO scheduleCreateDTO = new ScheduleCreateDTO(
@@ -196,6 +199,8 @@ public class GroupServiceImpl implements IGroupService {
         group.setSemester(semester);
         group.setSubject(subject);
         group.setDocente(docente);
+        group.setMax_students(dto.getMax_students());
+        group.setEnrolled(dto.getEnrolled());
 
         groupRepository.save(group);
         return true;

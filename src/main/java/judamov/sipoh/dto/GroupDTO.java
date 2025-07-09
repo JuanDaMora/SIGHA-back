@@ -21,5 +21,7 @@ public class GroupDTO {
     private Long idLevel;
     private String levelName;
     private String code;
+    private String max_students;
+    private String enrolled;
     private List<ScheduleDTO> scheduleList;
 }

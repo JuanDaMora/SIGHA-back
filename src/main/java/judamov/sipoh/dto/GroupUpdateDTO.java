@@ -9,5 +9,7 @@ public class GroupUpdateDTO {
     private String code;
     private Long idSubject;
     private Long idDocente;
+    private String max_students;
+    private String enrolled;
     private List<ScheduleDTO> scheduleList;
 }
