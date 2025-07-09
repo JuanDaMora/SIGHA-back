@@ -84,7 +84,11 @@ public class AuthPrivateController {
      * @return true si se registraron correctamente
      */
     @PostMapping("/users/bulk-register")
-    public ResponseEntity<Boolean> bulkRegisterUsers(@RequestBody List<BulkUserDTO> userBulkDTOList, @RequestHeader Long userId) {
-        return ResponseEntity.ok(authService.registerBulkUsers(userId,userBulkDTOList));
+    public ResponseEntity<Boolean> bulkRegisterUsers(
+            @RequestBody List<BulkUserDTO> userBulkDTOList,
+            @RequestHeader Long userId,
+            @RequestParam Boolean isFakeEmail
+    ) {
+        return ResponseEntity.ok(authService.registerBulkUsers(userId,userBulkDTOList, isFakeEmail));
     }
 }

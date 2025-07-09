@@ -30,8 +30,6 @@ public class Subject {
     private String codigo;
     @Column(name = "name")
     private String name;
-    @Column(name= "max_students")
-    private Integer max_students;
     @CreationTimestamp
     @Column(name = "creation_date", updatable = false)
     private LocalDateTime createdAt;

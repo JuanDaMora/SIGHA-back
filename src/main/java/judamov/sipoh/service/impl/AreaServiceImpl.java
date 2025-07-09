@@ -26,18 +26,19 @@ public class AreaServiceImpl  implements IAreaService {
     private final ISubjectRepository subjectRepository;
     @Override
     public List<AreaSubjectDTO> getAllAreas() {
-        // Obtener todas las materias con sus áreas asociadas
+        List<Area> allAreas = areaRepository.findAll();
         List<Subject> allSubjects = subjectRepository.findAll();
 
         // Agrupar materias por área
-        Map<Area, List<Subject>> groupedByArea = allSubjects.stream()
-                .collect(Collectors.groupingBy(Subject::getArea));
+        Map<Long, List<Subject>> subjectsByAreaId = allSubjects.stream()
+                .collect(Collectors.groupingBy(subject -> subject.getArea().getId()));
 
-        // Mapear a DTOs
-        return groupedByArea.entrySet().stream()
-                .map(entry -> {
-                    Area area = entry.getKey();
-                    List<SubjectDTO> subjectDTOs = entry.getValue().stream()
+        // Construir la lista de AreaSubjectDTO
+        return allAreas.stream()
+                .map(area -> {
+                    List<SubjectDTO> subjectDTOs = subjectsByAreaId
+                            .getOrDefault(area.getId(), List.of())
+                            .stream()
                             .map(subject -> SubjectDTO.builder()
                                     .id(subject.getId())
                                     .name(subject.getName())
@@ -55,6 +56,7 @@ public class AreaServiceImpl  implements IAreaService {
                 })
                 .toList();
     }
+
 
 
     @Transactional
