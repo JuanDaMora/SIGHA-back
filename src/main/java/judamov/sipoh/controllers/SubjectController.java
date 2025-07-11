@@ -19,4 +19,13 @@ public class SubjectController {
             ){
         return ResponseEntity.ok(subjectService.createSubject(subjectCreateDTO,userId));
     }
+    @PutMapping("/{subjectId}")
+    public ResponseEntity<Boolean> updateSubject(
+            @PathVariable Long subjectId,
+            @RequestBody SubjectCreateDTO subjectCreateDTO,
+            @RequestHeader Long userId
+    ) {
+        return ResponseEntity.ok(subjectService.updateSubject(subjectId, subjectCreateDTO, userId));
+    }
+
 }

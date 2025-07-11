@@ -72,5 +72,33 @@ public class SubjectServiceImpl implements ISubjectService {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
     }
+    @Override
+    @Transactional
+    public Boolean updateSubject(Long subjectId, SubjectCreateDTO dto, Long adminId) {
+        validateAdminAccess(adminId);
+
+        Subject subject = subjectRepository.findById(subjectId)
+                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Asignatura no encontrada"));
+
+        Area area = areaRepository.findById(dto.getIdArea())
+                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Área no encontrada"));
+
+        LevelSubject levelSubject = levelSubjectRepository.findById(dto.getIdLevel())
+                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Nivel no encontrado"));
+
+        subject.setCodigo(dto.getCode());
+        subject.setName(dto.getName());
+        subject.setArea(area);
+        subject.setLevelSubject(levelSubject);
+
+        try {
+            subjectRepository.save(subject);
+        } catch (Exception e) {
+            throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR, "Error actualizando la asignatura");
+        }
+
+        return true;
+    }
+
 
 }
