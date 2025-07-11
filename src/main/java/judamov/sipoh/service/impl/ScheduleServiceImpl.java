@@ -61,9 +61,7 @@ public class ScheduleServiceImpl implements IScheduleService {
                 }).toList();
 
         List<Schedule> savedSchedules = scheduleRepository.saveAll(schedulesToSave);
-        if((dto.getIdDocente() != null)){
-            groupService.updateDocente(dto.getIdGroup(), dto.getIdDocente(), adminId);
-        }
+        groupService.updateDocente(dto.getIdGroup(), dto.getIdDocente(), adminId);
         // Devolver la lista con IDs ya persistidos
         return savedSchedules.stream()
                 .map(s -> new ScheduleDTO(s.getId(), s.getStartTime().getHour(), s.getDay()))

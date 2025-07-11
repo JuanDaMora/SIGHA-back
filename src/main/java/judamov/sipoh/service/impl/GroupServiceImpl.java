@@ -1,5 +1,6 @@
 package judamov.sipoh.service.impl;
 
+import jakarta.transaction.Transactional;
 import judamov.sipoh.dto.*;
 import judamov.sipoh.entity.*;
 import judamov.sipoh.exceptions.GenericAppException;
@@ -117,6 +118,7 @@ public class GroupServiceImpl implements IGroupService {
      * @return Grupo creado en forma de DTO.
      */
     @Override
+    @Transactional
     public Boolean createGroup(GroupCreateDTO dto, Long adminId, Long semesterId) {
         validateAdminAccess(adminId);
 
@@ -270,6 +272,28 @@ public class GroupServiceImpl implements IGroupService {
         });
 
         return groupDTOList;
+    }
+
+    /**
+     * Crea múltiples grupos en bloque.
+     *
+     * @param dtos       Lista de DTOs con la información de los grupos.
+     * @param adminId    ID del administrador que realiza la operación.
+     * @param semesterId ID del semestre al que pertenecen todos los grupos.
+     * @return true si todos los grupos se crearon sin errores; lanza excepción si alguno falla.
+     */
+    @Override
+    @Transactional
+    public Boolean createGroupsBulk(List<GroupCreateDTO> dtos, Long adminId, Long semesterId) {
+        // Verificar sólo una vez
+        validateAdminAccess(adminId);
+
+        for (GroupCreateDTO dto : dtos) {
+            // Reutiliza tu método existente
+            createGroup(dto, adminId, semesterId);
+        }
+
+        return true;
     }
 
 

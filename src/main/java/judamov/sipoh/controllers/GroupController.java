@@ -67,6 +67,13 @@ public class GroupController {
             @RequestHeader Long userId) {
         return ResponseEntity.ok(groupService.createGroup(dto, userId, semesterId));
     }
+    @PostMapping("/bulk")
+    public ResponseEntity<Boolean> createBulkGroups(
+            @RequestBody List<GroupCreateDTO> dtos,
+            @RequestHeader Long semesterId,
+            @RequestHeader Long userId) {
+        return ResponseEntity.ok(groupService.createGroupsBulk(dtos, userId, semesterId));
+    }
     @DeleteMapping("/{id}")
     public ResponseEntity<Boolean> deleteGroup(
             @PathVariable Long id,
@@ -74,5 +81,7 @@ public class GroupController {
     ){
         return ResponseEntity.ok(groupService.deleteGroup(id,userId));
     }
+
+
 
 }
