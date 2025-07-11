@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS "user" (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE,
     id_type_document INTEGER NOT NULL REFERENCES type_document(id),
-    documento VARCHAR(255) NOT NULL UNIQUE,
+        documento VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     first_name VARCHAR(255) NOT NULL,
     last_name VARCHAR(255) NOT NULL,
@@ -159,11 +159,15 @@ INSERT INTO roles (name) VALUES
                              ('PROFESOR')
     ON CONFLICT DO NOTHING;
 insert into sigla (sigla )values
-    ('C.C')
+    ('C.C'),
+    ('PPT'),
+    ('C.E')
     on conflict do nothing;
 
 INSERT INTO type_document (sigla_id,description) VALUES
-    ('1','CEDULA DE CIUDADANIA')
+    ('1','CEDULA DE CIUDADANIA'),
+    ('2', 'PERMISO POR PROTECCION TEMPORAL'),
+    ('3', 'CIUDADANIA EXTRANJERA')
     ON CONFLICT DO NOTHING;
 
 INSERT INTO semester (description, start_date, end_date, created_at, updated_at)
@@ -202,510 +206,530 @@ INSERT INTO area (description) VALUES
                                    ('DESCONOCIDO')
     ON CONFLICT DO NOTHING;
 
+INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
+VALUES ((SELECT id FROM area WHERE description = 'MATEMÁTICAS COMPUTACIONALES'),(SELECT id FROM level_subject WHERE description = 'NIVEL 3'),'22954','MATEMÁTICAS DISCRETAS',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'MATEMÁTICAS COMPUTACIONALES'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 3'),
-           '22954',
-           'MATEMÁTICAS DISCRETAS',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'MATEMÁTICAS COMPUTACIONALES'),(SELECT id FROM level_subject WHERE description = 'NIVEL 6'),'21857','ESTADÍSTICA I',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'MATEMÁTICAS COMPUTACIONALES'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 6'),
-           '21857',
-           'ESTADÍSTICA I',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'MATEMÁTICAS COMPUTACIONALES'),(SELECT id FROM level_subject WHERE description = 'NIVEL 7'),'21858','ESTADÍSTICA II',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'MATEMÁTICAS COMPUTACIONALES'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 7'),
-           '21857',
-           'ESTADÍSTICA II',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'MATEMÁTICAS COMPUTACIONALES'),(SELECT id FROM level_subject WHERE description = 'NIVEL 5'),'22962','ANÁLISIS NUMÉRICO',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'MATEMÁTICAS COMPUTACIONALES'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 5'),
-           '12345',
-           'ANÁLISIS NUMÉRICO',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'ARQUITECTURA Y FUNCIONAMIENTO DEL COMPUTADOR'),(SELECT id FROM level_subject WHERE description = 'NIVEL 4'),'22957','ELECTRICIDAD Y ELECTRÓNICA',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'ARQUITECTURA Y FUNCIONAMIENTO DEL COMPUTADOR'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 4'),
-           '22957',
-           'ELECTRICIDAD Y ELECTRÓNICA',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'ARQUITECTURA Y FUNCIONAMIENTO DEL COMPUTADOR'),(SELECT id FROM level_subject WHERE description = 'NIVEL 5'),'22961','SISTEMAS DIGITALES',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'ARQUITECTURA Y FUNCIONAMIENTO DEL COMPUTADOR'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 5'),
-           '22961',
-           'SISTEMAS DIGITALES',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'ARQUITECTURA Y FUNCIONAMIENTO DEL COMPUTADOR'),(SELECT id FROM level_subject WHERE description = 'NIVEL 6'),'22966','ARQUITECTURA DE COMPUTADORES',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'ARQUITECTURA Y FUNCIONAMIENTO DEL COMPUTADOR'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 6'),
-           '12345',
-           'ARQUITECTURA DE COMPUTADORES',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'ARQUITECTURA Y FUNCIONAMIENTO DEL COMPUTADOR'),(SELECT id FROM level_subject WHERE description = 'NIVEL 8'),'22972','SISTEMAS OPERACIONALES',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'ARQUITECTURA Y FUNCIONAMIENTO DEL COMPUTADOR'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 8'),
-           '22972',
-           'SISTEMAS OPERACIONALES',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'ARQUITECTURA Y FUNCIONAMIENTO DEL COMPUTADOR'),(SELECT id FROM level_subject WHERE description = 'NIVEL 10'),'12345','SISTEMAS DISTRIBUIDOS',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'ARQUITECTURA Y FUNCIONAMIENTO DEL COMPUTADOR'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 10'),
-           '12345',
-           'SISTEMAS DISTRIBUIDOS',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'ALGORÍTMICA E INFORMÁTICA'),(SELECT id FROM level_subject WHERE description = 'NIVEL 1'),'22948','FUNDAMENTOS DE PROGRAMACIÓN',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'ALGORÍTMICA E INFORMÁTICA'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 1'),
-           '22948',
-           'FUNDAMENTOS DE PROGRAMACIÓN',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'ALGORÍTMICA E INFORMÁTICA'),(SELECT id FROM level_subject WHERE description = 'NIVEL 2'),'22951','PROGRAMACIÓN ORIENTADA A OBJETOS',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'ALGORÍTMICA E INFORMÁTICA'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 2'),
-           '22951',
-           'PROGRAMACIÓN ORIENTADA A OBJETOS',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'ALGORÍTMICA E INFORMÁTICA'),(SELECT id FROM level_subject WHERE description = 'NIVEL 3'),'22955','ESTRUCTURA DE DATOS Y ANÁLISIS DE ALGORITMOS',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'ALGORÍTMICA E INFORMÁTICA'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 3'),
-           '22955',
-           'ESTRUCTURA DE DATOS Y ANÁLISIS DE ALGORITMOS',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'ALGORÍTMICA E INFORMÁTICA'),(SELECT id FROM level_subject WHERE description = 'NIVEL 6'),'22967','PROGRAMACIÓN EN LA WEB',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'ALGORÍTMICA E INFORMÁTICA'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 6'),
-           '22967',
-           'PROGRAMACIÓN EN LA WEB',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'ALGORÍTMICA E INFORMÁTICA'),(SELECT id FROM level_subject WHERE description = 'NIVEL 4'),'22958','AUTÓMATAS Y LENGUAJES FORMALES',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'ALGORÍTMICA E INFORMÁTICA'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 4'),
-           '12345',
-           'AUTÓMATAS Y LENGUAJES FORMALES',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'ALGORÍTMICA E INFORMÁTICA'),(SELECT id FROM level_subject WHERE description = 'NIVEL 10'),'24542','ENTORNOS DE PROGRAMACIÓN',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'ALGORÍTMICA E INFORMÁTICA'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 10'),
-           '24542',
-           'ENTORNOS DE PROGRAMACIÓN',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'ALGORÍTMICA E INFORMÁTICA'),(SELECT id FROM level_subject WHERE description = 'NIVEL 10'),'12345','PROGRAMACIÓN DISTRIBUIDA',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'ALGORÍTMICA E INFORMÁTICA'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 10'),
-           '12345',
-           'PROGRAMACIÓN DISTRIBUIDA',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'ADMINISTRACIÓN DE LA INFORMACIÓN'),(SELECT id FROM level_subject WHERE description = 'NIVEL 4'),'22959','BASES DE DATOS I',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'ADMINISTRACIÓN DE LA INFORMACIÓN'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 4'),
-           '12345',
-           'BASES DE DATOS I',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'ADMINISTRACIÓN DE LA INFORMACIÓN'),(SELECT id FROM level_subject WHERE description = 'NIVEL 5'),'22960','BASES DE DATOS II',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'ADMINISTRACIÓN DE LA INFORMACIÓN'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 5'),
-           '12345',
-           'BASES DE DATOS II',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'ADMINISTRATIVAS Y ORGANIZACIONALES'),(SELECT id FROM level_subject WHERE description = 'NIVEL 5'),'22963','PENSAMIENTO SISTÉMICO Y ORGANIZACIONAL',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'ADMINISTRATIVAS Y ORGANIZACIONALES'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 5'),
-           '22963',
-           'PENSAMIENTO SISTÉMICO Y ORGANIZACIONAL',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'ADMINISTRATIVAS Y ORGANIZACIONALES'),(SELECT id FROM level_subject WHERE description = 'NIVEL 6'),'22968','SISTEMAS DE INFORMACIÓN',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'ADMINISTRATIVAS Y ORGANIZACIONALES'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 6'),
-           '12345',
-           'SISTEMAS DE INFORMACIÓN',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'ADMINISTRATIVAS Y ORGANIZACIONALES'),(SELECT id FROM level_subject WHERE description = 'NIVEL 10'),'12345','AUDITORÍA DE SISTEMAS',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'ADMINISTRATIVAS Y ORGANIZACIONALES'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 10'),
-           '12345',
-           'AUDITORÍA DE SISTEMAS',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'REDES Y COMUNICACIONES'),(SELECT id FROM level_subject WHERE description = 'NIVEL 6'),'22965','REDES DE COMPUTADORES I',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'REDES Y COMUNICACIONES'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 6'),
-           '22965',
-           'REDES DE COMPUTADORES I',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'REDES Y COMUNICACIONES'),(SELECT id FROM level_subject WHERE description = 'NIVEL 7'),'22970','REDES DE COMPUTADORES II',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'REDES Y COMUNICACIONES'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 7'),
-           '22970',
-           'REDES DE COMPUTADORES II',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'REDES Y COMUNICACIONES'),(SELECT id FROM level_subject WHERE description = 'NIVEL 10'),'12345','GESTIÓN DE REDES EMPRESARIALES',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'REDES Y COMUNICACIONES'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 10'),
-           '12345',
-           'GESTIÓN DE REDES EMPRESARIALES',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'INGENIERÍA DEL SOFTWARE'),(SELECT id FROM level_subject WHERE description = 'NIVEL 7'),'22969','INGENIERÍA DEL SOFTWARE I',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'INGENIERÍA DEL SOFTWARE'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 7'),
-           '22969',
-           'INGENIERÍA DEL SOFTWARE I',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'INGENIERÍA DEL SOFTWARE'),(SELECT id FROM level_subject WHERE description = 'NIVEL 8'),'22973','INGENIERÍA DEL SOFTWARE II',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'INGENIERÍA DEL SOFTWARE'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 8'),
-           '22973',
-           'INGENIERÍA DEL SOFTWARE II',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'SISTEMAS'),(SELECT id FROM level_subject WHERE description = 'NIVEL 8'),'22974','SIMULACIÓN DIGITAL',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'SISTEMAS'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 8'),
-           '22974',
-           'SIMULACIÓN DIGITAL',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'SISTEMAS'),(SELECT id FROM level_subject WHERE description = 'NIVEL 10'),'12345','TRATAMIENTO DE SEÑALES',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'SISTEMAS'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 10'),
-           '12345',
-           'TRATAMIENTO DE SEÑALES',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'SISTEMAS'),(SELECT id FROM level_subject WHERE description = 'NIVEL 10'),'12345','MODELADO ESTRUCTURAL',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'SISTEMAS'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 10'),
-           '12345',
-           'MODELADO ESTRUCTURAL',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'SISTEMAS'),(SELECT id FROM level_subject WHERE description = 'NIVEL 10'),'12345','INVESTIGACIÓN OPERACIONAL',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'SISTEMAS'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 10'),
-           '12345',
-           'INVESTIGACIÓN OPERACIONAL',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'SISTEMAS'),(SELECT id FROM level_subject WHERE description = 'NIVEL 10'),'12345','MODELOS A GRAN ESCALA',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'SISTEMAS'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 10'),
-           '12345',
-           'MODELOS A GRAN ESCALA',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'SISTEMAS'),(SELECT id FROM level_subject WHERE description = 'NIVEL 10'),'12345','SISTEMAS DISCRETOS Y CONTINUOS',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'SISTEMAS'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 10'),
-           '12345',
-           'SISTEMAS DISCRETOS Y CONTINUOS',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'INGENIERÍA ARTIFICIAL'),(SELECT id FROM level_subject WHERE description = 'NIVEL 7'),'22971','INGENIERÍA ARTIFICIAL I',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'INGENIERÍA ARTIFICIAL'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 7'),
-           '12345',
-           'INGENIERÍA ARTIFICIAL I',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'INGENIERÍA ARTIFICIAL'),(SELECT id FROM level_subject WHERE description = 'NIVEL 10'),'24552','INGENIERÍA ARTIFICIAL II',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'INGENIERÍA ARTIFICIAL'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 10'),
-           '12345',
-           'INGENIERÍA ARTIFICIAL II',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'INGENIERÍA ARTIFICIAL'),(SELECT id FROM level_subject WHERE description = 'NIVEL 10'),'12345','INGENIERÍA ARTIFICIAL III',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'INGENIERÍA ARTIFICIAL'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 10'),
-           '12345',
-           'INGENIERÍA ARTIFICIAL III',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'INGENIERÍA ARTIFICIAL'),(SELECT id FROM level_subject WHERE description = 'NIVEL 10'),'12345','MICROCONTROLADORES I',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'INGENIERÍA ARTIFICIAL'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 10'),
-           '12345',
-           'MICROCONTROLADORES I',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'INGENIERÍA ARTIFICIAL'),(SELECT id FROM level_subject WHERE description = 'NIVEL 10'),'12345','MICROCONTROLADORES II',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'INGENIERÍA ARTIFICIAL'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 10'),
-           '12345',
-           'MICROCONTROLADORES II',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'INGENIERÍA ARTIFICIAL'),(SELECT id FROM level_subject WHERE description = 'NIVEL 10'),'12345','INFORMÁTICA BIOMÉDICA',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'INGENIERÍA ARTIFICIAL'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 10'),
-           '12345',
-           'INFORMÁTICA BIOMÉDICA',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'DESCONOCIDO'),(SELECT id FROM level_subject WHERE description = 'NIVEL 5'),'41333','ALGORITMOS Y PROGRAMACION',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'DESCONOCIDO'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 5'),
-           '41333',
-           'ALGORITMOS Y PROGRAMACION',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'DESCONOCIDO'),(SELECT id FROM level_subject WHERE description = 'NIVEL 5'),'27582','ANALISIS DE DATOS A GRAN ESCALA',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'DESCONOCIDO'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 5'),
-           '27582',
-           'ANALISIS DE DATOS A GRAN ESCALA',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'DESCONOCIDO'),(SELECT id FROM level_subject WHERE description = 'NIVEL 5'),'40941','BIOLOGIA CELULAR Y MOLECULAR',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'DESCONOCIDO'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 5'),
-           '22958',
-           'AUTOMATAS Y LENGUAJES FORMALES',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'DESCONOCIDO'),(SELECT id FROM level_subject WHERE description = 'NIVEL 5'),'40937','BIOQUIMICA',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'DESCONOCIDO'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 5'),
-           '40941',
-           'BIOLOGIA CELULAR Y MOLECULAR',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'DESCONOCIDO'),(SELECT id FROM level_subject WHERE description = 'NIVEL 5'),'23016','ESTRUCTURAS COMPUTACIONALES',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'DESCONOCIDO'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 5'),
-           '40937',
-           'BIOQUIMICA',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'DESCONOCIDO'),(SELECT id FROM level_subject WHERE description = 'NIVEL 5'),'21870','GERENCIA DE INFORMATICA I',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'DESCONOCIDO'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 5'),
-           '23016',
-           'ESTRUCTURAS COMPUTACIONALES',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'DESCONOCIDO'),(SELECT id FROM level_subject WHERE description = 'NIVEL 5'),'28664','INNOVACION EDUCATIVA EN LA SOCIEDAD DE INFORMACION',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'DESCONOCIDO'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 5'),
-           '21870',
-           'GERENCIA DE INFORMATICA I',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'DESCONOCIDO'),(SELECT id FROM level_subject WHERE description = 'NIVEL 5'),'41331','INTRODUCCION A LA ING EN CIENCIA DE DATOS',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'DESCONOCIDO'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 5'),
-           '28664',
-           'INNOVACION EDUCATIVA EN LA SOCIEDAD',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'DESCONOCIDO'),(SELECT id FROM level_subject WHERE description = 'NIVEL 5'),'40938','INTRODUCCION A LA INGENIERIA BIOMEDICA',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'DESCONOCIDO'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 5'),
-           '22971',
-           'INTELIGENCIA ARTIFICIAL I',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'DESCONOCIDO'),(SELECT id FROM level_subject WHERE description = 'NIVEL 5'),'28665','MODELOS DE NEGOCIOS EN LA SOCIEDAD DE LA INFORMACIÓN',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'DESCONOCIDO'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 5'),
-           '24552',
-           'INTELIGENCIA ARTIFICIAL II',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'DESCONOCIDO'),(SELECT id FROM level_subject WHERE description = 'NIVEL 5'),'27798','OPTIMIZACION CONVEXA',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'DESCONOCIDO'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 5'),
-           '41331',
-           'INTRODUCCION A LA ING EN CIENCIA DE DATOS',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'DESCONOCIDO'),(SELECT id FROM level_subject WHERE description = 'NIVEL 5'),'28091','PRINCIPIOS Y PRACTICAS DE DESARROLLO DE SOFTWARE ORIENTADO',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'DESCONOCIDO'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 5'),
-           '40938',
-           'INTRODUCCION A LA INGENIERIA BIOMEDICA',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'DESCONOCIDO'),(SELECT id FROM level_subject WHERE description = 'NIVEL 5'),'41017','PROGRAMACION',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'DESCONOCIDO'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 5'),
-           '28665',
-           'MODELOS DE NEGOCIOS EN LA SOCIEDAD DE LA INFORMACIÓN',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'DESCONOCIDO'),(SELECT id FROM level_subject WHERE description = 'NIVEL 5'),'22490','SEGURIDAD INFORMATICA',NOW(), NOW());
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'DESCONOCIDO'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 5'),
-           '27798',
-           'OPTIMIZACION CONVEXA',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'DESCONOCIDO'),(SELECT id FROM level_subject WHERE description = 'NIVEL 5'),'22968','SISTEMAS DE INFORMACION',NOW(), NOW());
+
 
 INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'DESCONOCIDO'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 5'),
-           '28091',
-           'PRINCIPIOS Y PRACTICAS DE DESARROLLO DE SOFTWARE ORIENTADO',
-           NOW(), NOW()
-       );
+VALUES ((SELECT id FROM area WHERE description = 'DESCONOCIDO'),(SELECT id FROM level_subject WHERE description = 'NIVEL 5'),'27571','PROCESAMIENTO DE IMAGENES DIGITALES',NOW(), NOW());
 
-INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'DESCONOCIDO'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 5'),
-           '41017',
-           'PROGRAMACION',
-           NOW(), NOW()
-       );
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--
+-- -- ALGORITMOS Y PROGRAMACION -- A1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at )
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '41333'),(SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'A1', '21', '21', NOW(), NOW());
+--
+-- -- ALGORITMOS Y PROGRAMACION -- E1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at )
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '41333'),(SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'E1', '21', '21', NOW(), NOW());
+--
+-- -- ANALISIS DE DATOS A GRAN ESCALA -- E1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at )
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '27582'),(SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'E1', '25', '21', NOW(), NOW());
+--
+-- -- ANALISIS NUMERICO -- C1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at )
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22962'),(SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'C1', '25', '21', NOW(), NOW());
+--
+-- -- ANALISIS NUMERICO -- C2
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at )
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22962'),(SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'C2', '25', '21', NOW(), NOW());
+--
+-- -- ANALISIS NUMERICO -- E1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at )
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22962'),(SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'E1', '23', '23', NOW(), NOW());
+--
+-- -- ANALISIS NUMERICO -- E2
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at )
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22962'), (SELECT id FROM sigha."user" u WHERE u.documento = '91511969' ) , 'E2', '23', '23', NOW(), NOW());
+--
+-- -- ANALISIS NUMERICO -- F1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at )
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22962'), (SELECT id FROM sigha."user" u WHERE u.documento = '91511969' ) , 'F1', '23', '23', NOW(), NOW());
+--
+-- -- ARQUITECTURA DE COMPUTADORES -- A1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at )
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22966'), (SELECT id FROM sigha."user" u WHERE u.documento = '6750912' ) , 'A1', '25', '25', NOW(), NOW());
+--
+-- -- ARQUITECTURA DE COMPUTADORES -- E1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at )
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22966'), (SELECT id FROM sigha."user" u WHERE u.documento = '91511969' ) , 'E1', '25', '25', NOW(), NOW());
+--
+-- -- ARQUITECTURA DE COMPUTADORES -- F1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at )
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22966'), (SELECT id FROM sigha."user" u WHERE u.documento = '91506973' ) , 'F1', '25', '25', NOW(), NOW());
+--
+-- -- ARQUITECTURA DE COMPUTADORES -- G1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at )
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22966'), (SELECT id FROM sigha."user" u WHERE u.documento = '6750912' ) , 'G1', '25', '25', NOW(), NOW());
+--
+-- -- AUTOMATAS Y LENGUAJES FORMALES -- C1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at )
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22958'), (SELECT id FROM sigha."user" u WHERE u.documento = '1098617175' ) , 'C1', '22', '19', NOW(), NOW());
+--
+-- -- AUTOMATAS Y LENGUAJES FORMALES -- C2
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at )
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22958'), (SELECT id FROM sigha."user" u WHERE u.documento = '1098717616' ) , 'C2', '22', '19', NOW(), NOW());
+--
+-- -- AUTOMATAS Y LENGUAJES FORMALES -- E1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at )
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22958'), (SELECT id FROM sigha."user" u WHERE u.documento = '1098617175' ) , 'E1', '22', '19', NOW(), NOW());
+--
+-- -- BASES DE DATOS I -- C1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at )
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22959'), (SELECT id FROM sigha."user" u WHERE u.documento = '6750912' ) , 'C1', '20', '19', NOW(), NOW());
+--
+-- -- BASES DE DATOS I -- G1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at )
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22959'), (SELECT id FROM sigha."user" u WHERE u.documento = '1098662948' ) , 'G1', '21', '19', NOW(), NOW());
+--
+-- -- BASES DE DATOS I -- G2
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at )
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22959'), (SELECT id FROM sigha."user" u WHERE u.documento = '91498272' ) , 'G2', '21', '19', NOW(), NOW());
+--
+-- -- BASES DE DATOS II -- F1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at )
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22960'), (SELECT id FROM sigha."user" u WHERE u.documento = '1099371476' ) , 'F1', '21', '19', NOW(), NOW());
+--
+-- -- BASES DE DATOS II -- F2
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at )
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22960'), (SELECT id FROM sigha."user" u WHERE u.documento = '91498272' ) , 'F2', '21', '19', NOW(), NOW());
+--
+-- -- BASES DE DATOS II -- G1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at )
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22960'), (SELECT id FROM sigha."user" u WHERE u.documento = '1099371476' ) , 'G1', '21', '19', NOW(), NOW());
+--
+-- -- BASES DE DATOS II -- G2
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at )
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22960'), (SELECT id FROM sigha."user" u WHERE u.documento = '1099371476' ) , 'G2', '21', '19', NOW(), NOW());
+--
+-- -- BIOLOGIA CELULAR Y MOLECULAR -- B1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at )
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '40941'), (SELECT id FROM sigha."user" u WHERE u.documento = '0' ) , 'B1', '21', '19', NOW(), NOW());
+--
+-- -- BIOLOGIA CELULAR Y MOLECULAR -- B2
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '40941'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'B2', '21', '19', NOW(), NOW());
+--
+-- -- BIOLOGIA CELULAR Y MOLECULAR -- C1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '40941'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'C1', '21', '19', NOW(), NOW());
+--
+-- -- BIOQUIMICA -- PB1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '40937'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'PB1', '21', '19', NOW(), NOW());
+--
+-- -- BIOQUIMICA -- PB2
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '40937'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'PB2', '21', '19', NOW(), NOW());
+--
+-- -- BIOQUIMICA -- PF1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '40937'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '1098617404' ), 'PF1', '21', '19', NOW(), NOW());
+--
+-- -- BIOQUIMICA -- PF2
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '40937'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '1098617404' ), 'PF2', '21', '19', NOW(), NOW());
+--
+-- -- ELECTRICIDAD Y ELECTRONICA -- A1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22957'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '1127942021' ), 'A1', '21', '19', NOW(), NOW());
+--
+-- -- ELECTRICIDAD Y ELECTRONICA -- B1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22957'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '1127942021' ), 'B1', '21', '19', NOW(), NOW());
+--
+-- -- ELECTRICIDAD Y ELECTRONICA -- C1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22957'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '1127942021' ), 'C1', '21', '19', NOW(), NOW());
+--
+-- -- ENTORNOS DE PROGRAMACION -- E1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '24542'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '91246221' ), 'E1', '21', '19', NOW(), NOW());
+--
+-- -- ESTADISTICA I -- G1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '21857'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '591267' ), 'G1', '21', '19', NOW(), NOW());
+--
+-- -- ESTADISTICA I -- E1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '21857'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '591267' ), 'E1', '21', '19', NOW(), NOW());
+--
+-- -- ESTADISTICA I -- F1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '21857'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'F1', '21', '19', NOW(), NOW());
+--
+-- -- ESTADISTICA I -- F2
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '21857'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '1098604393' ), 'F2', '21', '19', NOW(), NOW());
+--
+-- -- ESTADISTICA II -- C1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '21858'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '91275575' ), 'C1', '21', '19', NOW(), NOW());
+--
+-- -- ESTADISTICA II -- E1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '21858'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '591267' ), 'E1', '21', '19', NOW(), NOW());
+--
+-- -- ESTADISTICA II -- F1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '21858'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '91477322' ), 'F1', '21', '19', NOW(), NOW());
+--
+-- -- ESTADISTICA II -- F2
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '21858'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '1098604393' ), 'F2', '21', '19', NOW(), NOW());
+--
+-- -- INGENIERIA DEL SOFTWARE I -- C1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22969'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '91498272' ), 'C1', '21', '19', NOW(), NOW());
+--
+-- -- INGENIERIA DEL SOFTWARE I -- C2
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22969'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '91498272' ), 'C2', '21', '19', NOW(), NOW());
+--
+-- -- INGENIERIA DEL SOFTWARE I -- F2
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22969'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'F2', '21', '19', NOW(), NOW());
+--
+-- -- INGENIERIA DEL SOFTWARE II -- F2
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22973'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '91498272' ), 'F2', '21', '19', NOW(), NOW());
+--
+-- -- INGENIERIA DEL SOFTWARE II -- B1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22973'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'B1', '21', '19', NOW(), NOW());
+--
+-- -- INGENIERIA DEL SOFTWARE II -- E1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22973'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '91498272' ), 'E1', '21', '19', NOW(), NOW());
+--
+-- -- INGENIERIA DEL SOFTWARE II -- G1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22973'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'G1', '21', '19', NOW(), NOW());
+--
+-- -- INNOVACION EDUCATIVA EN LA SOCIEDAD DE INFORMACION -- B1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '28664'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'B1', '21', '19', NOW(), NOW());
+--
+-- -- INTELIGENCIA ARTIFICIAL I -- B1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22971'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '1098801497' ), 'B1', '21', '19', NOW(), NOW());
+--
+-- -- INTELIGENCIA ARTIFICIAL I -- C1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22971'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '1098801497' ), 'C1', '21', '19', NOW(), NOW());
+--
+-- -- INTELIGENCIA ARTIFICIAL I -- E1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22971'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'E1', '21', '19', NOW(), NOW());
+--
+-- -- INTELIGENCIA ARTIFICIAL I -- E2
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22971'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'E2', '21', '19', NOW(), NOW());
+--
+-- -- INTELIGENCIA ARTIFICIAL I -- F1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22971'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'F1', '21', '19', NOW(), NOW());
+--
+-- -- INTELIGENCIA ARTIFICIAL II -- B1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '24552'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '1098717616' ), 'B1', '21', '19', NOW(), NOW());
+--
+-- -- INTRODUCCION A LA ING EN CIENCIA DE DATOS -- PB1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '41331'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '91498272' ), 'PB1', '21', '19', NOW(), NOW());
+--
+-- -- INTRODUCCION A LA ING EN CIENCIA DE DATOS -- PD1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '41331'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '91498272' ), 'PD1', '21', '19', NOW(), NOW());
+--
+-- -- INTRODUCCION A LA INGENIERIA BIOMEDICA -- PC1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '40938'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'PC1', '21', '19', NOW(), NOW());
+--
+-- -- INTRODUCCION A LA INGENIERIA BIOMEDICA -- PE1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '40938'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'PE1', '21', '19', NOW(), NOW());
+--
+-- -- MATEMATICAS DISCRETAS -- B1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22954'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '1098617175' ), 'B1', '21', '19', NOW(), NOW());
+--
+-- -- MATEMATICAS DISCRETAS -- C1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22954'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '1098617175' ), 'C1', '21', '19', NOW(), NOW());
+--
+-- -- MATEMATICAS DISCRETAS -- C1 (Doble con otro docente)
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22954'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '91275575' ), 'C1', '21', '19', NOW(), NOW());
+--
+-- -- MATEMATICAS DISCRETAS -- F1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22954'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '91275575' ), 'F1', '21', '19', NOW(), NOW());
+--
+-- -- MATEMATICAS DISCRETAS -- F1 (Doble con docente desconocido)
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22954'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'F1', '21', '19', NOW(), NOW());
+--
+-- -- MATEMATICAS DISCRETAS -- F2
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22954'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'F2', '21', '19', NOW(), NOW());
+--
+-- -- MATEMATICAS DISCRETAS -- F3
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22954'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'F3', '23', '21', NOW(), NOW());
+--
+-- -- MODELOS DE NEGOCIOS EN LA SOCIEDAD DE LA INFORMACIÓN -- B1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '28665'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'B1', '29', '28', NOW(), NOW());
+--
+-- -- OPTIMIZACION CONVEXA -- C1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '27798'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'C1', '25', '21', NOW(), NOW());
+--
+-- -- PENSAMIENTO SISTEMICO Y ORGANIZACIONAL -- A1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22963'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'A1', '24', '23', NOW(), NOW());
+--
+-- -- PENSAMIENTO SISTEMICO Y ORGANIZACIONAL -- B1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22963'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'B1', '24', '24', NOW(), NOW());
+--
+-- -- PENSAMIENTO SISTEMICO Y ORGANIZACIONAL -- B2
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22963'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'B2', '24', '24', NOW(), NOW());
+--
+-- -- PENSAMIENTO SISTEMICO Y ORGANIZACIONAL -- C1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '22963'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'C1', '28', '28', NOW(), NOW());
+--
+-- -- PRINCIPIOS Y PRACTICAS DE DESARROLLO DE SOFTWARE ORIENTADO A -- C1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '28091'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'C1', '24', '23', NOW(), NOW());
+--
+-- -- PRINCIPIOS Y PRACTICAS DE DESARROLLO DE SOFTWARE ORIENTADO A -- G1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '28091'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '1049413439' ), 'G1', '25', '25', NOW(), NOW());
+--
+-- -- PROCESAMIENTO DE IMAGENES DIGITALES -- F1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '27571'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'F1', '25', '25', NOW(), NOW());
+--
+-- -- PROGRAMACION -- A1
+-- INSERT INTO sigha."group" (id_semester, id_subject, id_user, code, max_capacity, enrolled, created_at, updated_at)
+-- VALUES (1, (SELECT id FROM sigha.subject WHERE codigo = '41017'),
+--         (SELECT id FROM sigha."user" u WHERE u.documento = '0' ), 'A1', '25', '20', NOW(), NOW());
 
-INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'DESCONOCIDO'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 5'),
-           '22490',
-           'SEGURIDAD INFORMATICA',
-           NOW(), NOW()
-       );
 
-INSERT INTO subject (id_area, id_level_subject, codigo, name, creation_date, update_date)
-VALUES (
-           (SELECT id FROM area WHERE description = 'DESCONOCIDO'),
-           (SELECT id FROM level_subject WHERE description = 'NIVEL 5'),
-           '22968',
-           'SISTEMAS DE INFORMACION',
-           NOW(), NOW()
-       );
+
 
 
 INSERT INTO email_templates (code, subject, body) VALUES (
@@ -776,3 +800,4 @@ border-radius: 5px;
 </body>
 </html>'
 );
+
