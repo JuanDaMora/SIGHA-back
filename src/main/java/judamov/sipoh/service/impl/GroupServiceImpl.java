@@ -153,16 +153,22 @@ public class GroupServiceImpl implements IGroupService {
         validateAdminAccess(adminId);
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Grupo no encontrado"));
-        User newDocente = userRepository.findById(idDocente)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Docente no encontrado"));
 
-        group.setDocente(newDocente);
-        try{
+        try {
+            if (idDocente == null) {
+                // Quitar el docente del grupo si no se proporciona
+                group.setDocente(null);
+            } else {
+                // Asignar nuevo docente
+                User newDocente = userRepository.findById(idDocente)
+                        .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Docente no encontrado"));
+                group.setDocente(newDocente);
+            }
+
             groupRepository.save(group);
-        }catch (Exception e){
-            throw  new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR, "Error al actualizar el docente en el grupo "+ group.getCode());
+        } catch (Exception e) {
+            throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR, "Error al actualizar el docente en el grupo " + group.getCode());
         }
-        groupRepository.save(group);
         return true;
     }
     /**
