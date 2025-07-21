@@ -146,7 +146,7 @@ public class GroupServiceImpl implements IGroupService {
         Group savedGroup = groupRepository.save(group);
         ScheduleCreateDTO scheduleCreateDTO = new ScheduleCreateDTO(
                 savedGroup.getId(),
-                savedGroup.getDocente().getId(),
+                dto.getIdDocente() != null ? savedGroup.getDocente().getId() : null,
                 dto.getScheduleList()
         );
         scheduleService.createSchedule(scheduleCreateDTO,adminId);
