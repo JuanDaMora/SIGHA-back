@@ -10,6 +10,7 @@ import judamov.sipoh.repository.IUserRepository;
 import judamov.sipoh.repository.IUserRoleRepository;
 import judamov.sipoh.service.interfaces.ISemesterService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +24,7 @@ public class SemesterServiceImpl implements ISemesterService {
     private final UserRolServiceImpl userRolService;
     @Override
     public List<Semester> getAllSemesters(){
-        return semesterRepository.findAll();
+        return semesterRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
     }
     @Override
     @Transactional
