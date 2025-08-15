@@ -91,4 +91,12 @@ public class AuthPrivateController {
     ) {
         return ResponseEntity.ok(authService.registerBulkUsers(userId,userBulkDTOList, isFakeEmail));
     }
+
+    @PostMapping(value="register")
+    public ResponseEntity<RegisterResponse> register(
+            @RequestBody RegisterRequest request,
+            @RequestHeader Long userId
+    ){
+        return ResponseEntity.ok(authService.register(request,userId));
+    }
 }
