@@ -305,6 +305,28 @@ public class GroupServiceImpl implements IGroupService {
 
         return true;
     }
+    @Transactional
+    @Override
+    public Boolean deleteAllGroupsBySemesterId(Long userId, Long semesterId){
+        validateAdminAccess(userId);
+        Semester semester = semesterRepository.findById(semesterId)
+                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Semestre no encontrado"));
 
+        List<Group> groupList = groupRepository.findBySemester(semester);
+        if (groupList.isEmpty()) {
+            throw new GenericAppException(HttpStatus.NOT_FOUND, "No se encontraron grupos en el semestre");
+        } else {
+
+            // Primero eliminar schedules
+            scheduleRepository.deleteByGroupIn(groupList);
+
+            // Después eliminar los grupos
+            groupRepository.deleteAll(groupList);
+        }
+
+
+
+        return true;
+    }
 
 }
