@@ -81,7 +81,13 @@ public class GroupController {
     ){
         return ResponseEntity.ok(groupService.deleteGroup(id,userId));
     }
-
+    @DeleteMapping("/bySemester/{semesterId}")
+    public ResponseEntity<Boolean> deleteAllGroupsBySemesterId(
+            @RequestHeader Long userId,
+            @PathVariable Long semesterId
+    ) {
+        return ResponseEntity.ok(groupService.deleteAllGroupsBySemesterId(userId,semesterId));
+    }
 
 
 }
