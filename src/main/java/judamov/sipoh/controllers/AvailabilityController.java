@@ -2,7 +2,9 @@ package judamov.sipoh.controllers;
 
 import judamov.sipoh.dto.AvailabilityDTO;
 import judamov.sipoh.dto.GlobalAvabilityDTO;
+import judamov.sipoh.dto.IndividualAvailabilityDTO;
 import judamov.sipoh.service.impl.AvailabilityServiceImpl;
+import judamov.sipoh.service.impl.IndividualAvailabilityImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,41 +17,63 @@ import java.util.List;
 public class AvailabilityController {
 
     private final AvailabilityServiceImpl availabilityService;
+    private final IndividualAvailabilityImpl individualAvailabilityService;
+
+    // ----------------- GLOBAL AVAILABILITY -----------------
+
     @GetMapping("/global")
     public ResponseEntity<List<GlobalAvabilityDTO>> getGlobalAvailability(
             @RequestHeader Long semesterId,
             @RequestHeader Long userId
-    ){
-        return ResponseEntity.ok(availabilityService.getListGlobalAvailability(semesterId,userId));
+    ) {
+        return ResponseEntity.ok(availabilityService.getListGlobalAvailability(semesterId, userId));
     }
+
     @GetMapping("/global/{docentId}")
     public ResponseEntity<GlobalAvabilityDTO> getGlobalAvailability(
             @RequestHeader Long semesterId,
             @RequestHeader Long userId,
             @PathVariable String docentId
-    ){
-        return ResponseEntity.ok(availabilityService.getAvailabilityDTO(userId,semesterId,Long.parseLong(docentId)));
+    ) {
+        return ResponseEntity.ok(
+                availabilityService.getAvailabilityDTO(userId, semesterId, Long.parseLong(docentId))
+        );
     }
+
+    // ----------------- DOCENTE AVAILABILITY -----------------
 
     @GetMapping("/docente")
     public ResponseEntity<AvailabilityDTO> getAvailability(
             @RequestHeader Long userId,
-            @RequestHeader Long semesterId) {
-
-
-        AvailabilityDTO dto = availabilityService.getAvailabilityByIdDocent(userId,semesterId);
+            @RequestHeader Long semesterId
+    ) {
+        AvailabilityDTO dto = availabilityService.getAvailabilityByIdDocent(userId, semesterId);
         return ResponseEntity.ok(dto);
     }
-    @PostMapping
-    public ResponseEntity<Boolean> createAvailability(
+
+    // ----------------- INDIVIDUAL AVAILABILITY -----------------
+
+    @PostMapping("/individual")
+    public ResponseEntity<IndividualAvailabilityDTO> upsertIndividualAvailability(
             @RequestHeader Long userId,
             @RequestHeader Long semesterId,
-            @RequestBody AvailabilityDTO dto) {
-        return ResponseEntity.ok(availabilityService.createAvailability(userId, semesterId, dto));
+            @RequestParam Long docenteId,
+            @RequestParam boolean isActive
+    ) {
+        return ResponseEntity.ok(
+                individualAvailabilityService.upsertIndividualAvailability(semesterId, userId, isActive, docenteId)
+        );
     }
 
-    @PutMapping("/{availabilityId}")
-    public ResponseEntity<Boolean> updateAvailability(@PathVariable Long availabilityId, @RequestHeader Long newStatusId){
-        return ResponseEntity.ok(availabilityService.updateAvailabilityStatus(availabilityId,newStatusId));
+    @GetMapping("/individual")
+    public ResponseEntity<IndividualAvailabilityDTO> getIndividualAvailability(
+            @RequestHeader Long userId,
+            @RequestHeader Long semesterId,
+            @RequestParam Long docenteId
+    ) {
+        return ResponseEntity.ok(
+                individualAvailabilityService.getStatusIndividualAvailability(semesterId, userId, docenteId)
+        );
     }
+
 }
