@@ -1,5 +1,6 @@
 package judamov.sipoh.controllers;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import judamov.sipoh.dto.ScheduleCreateDTO;
 import judamov.sipoh.service.impl.ScheduleServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,7 @@ public class ScheduleController {
     @PutMapping
     public ResponseEntity<Boolean> updateSchedulesBydGroup(
             @RequestBody List<ScheduleCreateDTO> scheduleUpdateDTOS,
-            @RequestHeader Long userId
+            @Parameter(hidden = true) @RequestHeader Long userId
             ){
         return ResponseEntity.ok(scheduleService.updateScheduleGroup(scheduleUpdateDTOS,userId));
     }

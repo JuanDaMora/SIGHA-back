@@ -109,7 +109,14 @@ public class AuthServiceImpl {
      * @param request datos del usuario a registrar
      * @return respuesta con la contraseña (sin encriptar)
      */
-    public RegisterResponse register(RegisterRequest request) {
+    public RegisterResponse register(RegisterRequest request, Long userId) {
+        User admin = userRepository.findOneById(userId)
+                .orElseThrow(() -> new GenericAppException(HttpStatus.BAD_REQUEST, "Bad Request"));
+
+        if (!userRolService.hasAdminPrivileges(admin)) {
+            throw new GenericAppException(HttpStatus.UNAUTHORIZED, "Usuario no autorizado");
+        }
+
         TypeDocument typeDocument = typeDocumentRepository.findOneById(request.getIdTipoDocumento())
                 .orElseThrow(() -> new GenericAppException(HttpStatus.BAD_REQUEST,
                         "Tipo de documento no encontrado con id: " + request.getIdTipoDocumento()));
@@ -441,10 +448,7 @@ public class AuthServiceImpl {
                         .build();
 
                 emailService.sendEmail(emailRequest);
-
-
         }
-
         return true;
     }
 

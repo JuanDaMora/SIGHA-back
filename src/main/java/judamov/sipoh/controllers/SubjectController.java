@@ -1,5 +1,6 @@
 package judamov.sipoh.controllers;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import judamov.sipoh.dto.SubjectCreateDTO;
 import judamov.sipoh.service.impl.SubjectServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,7 @@ public class SubjectController {
     @PostMapping
     public ResponseEntity<Boolean> createSubject(
             @RequestBody SubjectCreateDTO subjectCreateDTO,
-            @RequestHeader Long userId
+            @Parameter(hidden = true) @RequestHeader Long userId
             ){
         return ResponseEntity.ok(subjectService.createSubject(subjectCreateDTO,userId));
     }
@@ -23,7 +24,7 @@ public class SubjectController {
     public ResponseEntity<Boolean> updateSubject(
             @PathVariable Long subjectId,
             @RequestBody SubjectCreateDTO subjectCreateDTO,
-            @RequestHeader Long userId
+            @Parameter(hidden = true) @RequestHeader Long userId
     ) {
         return ResponseEntity.ok(subjectService.updateSubject(subjectId, subjectCreateDTO, userId));
     }

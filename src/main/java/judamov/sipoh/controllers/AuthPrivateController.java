@@ -2,6 +2,7 @@ package judamov.sipoh.controllers;
 import judamov.sipoh.dto.*;
 import judamov.sipoh.service.impl.AuthServiceImpl;
 import lombok.RequiredArgsConstructor;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,7 +46,9 @@ public class AuthPrivateController {
      * @return datos del usuario en formato {@link UserDTO}
      */
     @GetMapping("/users/{id}")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id, @RequestHeader Long userId){
+    public ResponseEntity<UserDTO> getUserById(
+            @PathVariable Long id,
+            @Parameter(hidden = true) @RequestHeader Long userId){
         return ResponseEntity.ok(authService.getUserById(id,userId));
     }
 
@@ -68,12 +71,14 @@ public class AuthPrivateController {
      * @return true si la operación fue exitosa
      */
     @PutMapping("/users/{id}")
-    public ResponseEntity<Boolean> updateUser(@PathVariable Long id, @RequestBody UserDTO userDTO, @RequestHeader Long userId){
+    public ResponseEntity<Boolean> updateUser(@PathVariable Long id, @RequestBody UserDTO userDTO, @Parameter(hidden = true) @RequestHeader Long userId){
         return ResponseEntity.ok(authService.updateUser(userId, id, userDTO));
     }
 
     @PutMapping("/users/me")
-    public ResponseEntity<Boolean> updateUserMe(@RequestHeader Long userId,@RequestBody UserBasicUpdateDTO userDTO){
+    public ResponseEntity<Boolean> updateUserMe(
+            @Parameter(hidden = true) @RequestHeader Long userId,
+            @RequestBody UserBasicUpdateDTO userDTO){
         return ResponseEntity.ok(authService.updateUserMe(userId, userDTO));
     }
 
@@ -86,9 +91,17 @@ public class AuthPrivateController {
     @PostMapping("/users/bulk-register")
     public ResponseEntity<Boolean> bulkRegisterUsers(
             @RequestBody List<BulkUserDTO> userBulkDTOList,
-            @RequestHeader Long userId,
+            @Parameter(hidden = true) @RequestHeader Long userId,
             @RequestParam Boolean isFakeEmail
     ) {
         return ResponseEntity.ok(authService.registerBulkUsers(userId,userBulkDTOList, isFakeEmail));
+    }
+
+    @PostMapping(value="register")
+    public ResponseEntity<RegisterResponse> register(
+            @RequestBody RegisterRequest request,
+            @Parameter(hidden = true) @RequestHeader Long userId
+    ){
+        return ResponseEntity.ok(authService.register(request,userId));
     }
 }

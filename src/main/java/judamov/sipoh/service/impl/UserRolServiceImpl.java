@@ -42,4 +42,9 @@ public class UserRolServiceImpl {
                 .anyMatch(role -> role.getName().equalsIgnoreCase("DIRECTOR DE ESCUELA") ||
                         role.getName().equalsIgnoreCase("COORDINADOR ACADEMICO"));
     }
+
+    public Boolean hasTeacherPrivileges(User user) {
+        return getRolListFromUser(user).stream()
+                .anyMatch(role -> role.getName().equalsIgnoreCase("PROFESOR"));
+    }
 }

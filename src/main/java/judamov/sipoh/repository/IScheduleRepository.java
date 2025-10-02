@@ -11,4 +11,5 @@ import java.util.Optional;
 @Repository
 public interface IScheduleRepository extends JpaRepository<Schedule,Long> {
     Optional<List<Schedule>> findByGroup(Group group);
+    void deleteByGroupIn(List<Group> groups);
 }

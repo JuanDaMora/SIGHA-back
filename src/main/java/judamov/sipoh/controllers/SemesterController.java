@@ -1,5 +1,6 @@
 package judamov.sipoh.controllers;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import judamov.sipoh.dto.SemesterDTO;
 import judamov.sipoh.entity.Semester;
 import judamov.sipoh.service.impl.SemesterServiceImpl;
@@ -34,7 +35,7 @@ public class SemesterController {
     public ResponseEntity<Boolean> changeAvailability(
             @RequestParam Boolean newAvailability,
             @RequestParam Long semesterId,
-            @RequestHeader Long userId){
+            @Parameter(hidden = true) @RequestHeader Long userId){
         return ResponseEntity.ok(semesterService.changeAvailability(newAvailability,semesterId,userId));
     }
 }
