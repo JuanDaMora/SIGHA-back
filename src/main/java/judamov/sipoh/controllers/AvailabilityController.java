@@ -1,5 +1,6 @@
 package judamov.sipoh.controllers;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import judamov.sipoh.dto.AvailabilityDTO;
 import judamov.sipoh.dto.GlobalAvabilityDTO;
 import judamov.sipoh.dto.IndividualAvailabilityDTO;
@@ -24,7 +25,7 @@ public class AvailabilityController {
     @GetMapping("/global")
     public ResponseEntity<List<GlobalAvabilityDTO>> getGlobalAvailability(
             @RequestHeader Long semesterId,
-            @RequestHeader Long userId
+            @Parameter(hidden = true) @RequestHeader Long userId
     ) {
         return ResponseEntity.ok(availabilityService.getListGlobalAvailability(semesterId, userId));
     }
@@ -32,7 +33,7 @@ public class AvailabilityController {
     @GetMapping("/global/{docentId}")
     public ResponseEntity<GlobalAvabilityDTO> getGlobalAvailability(
             @RequestHeader Long semesterId,
-            @RequestHeader Long userId,
+            @Parameter(hidden = true) @RequestHeader Long userId,
             @PathVariable String docentId
     ) {
         return ResponseEntity.ok(
@@ -44,7 +45,7 @@ public class AvailabilityController {
 
     @GetMapping("/docente")
     public ResponseEntity<AvailabilityDTO> getAvailability(
-            @RequestHeader Long userId,
+            @Parameter(hidden = true) @RequestHeader Long userId,
             @RequestHeader Long semesterId
     ) {
         AvailabilityDTO dto = availabilityService.getAvailabilityByIdDocent(userId, semesterId);
@@ -55,7 +56,7 @@ public class AvailabilityController {
 
     @PostMapping("/individual")
     public ResponseEntity<IndividualAvailabilityDTO> upsertIndividualAvailability(
-            @RequestHeader Long userId,
+            @Parameter(hidden = true) @RequestHeader Long userId,
             @RequestHeader Long semesterId,
             @RequestParam Long docenteId,
             @RequestParam boolean isActive
@@ -67,7 +68,7 @@ public class AvailabilityController {
 
     @GetMapping("/individual")
     public ResponseEntity<IndividualAvailabilityDTO> getIndividualAvailability(
-            @RequestHeader Long userId,
+            @Parameter(hidden = true) @RequestHeader Long userId,
             @RequestHeader Long semesterId,
             @RequestParam Long docenteId
     ) {

@@ -1,6 +1,7 @@
 package judamov.sipoh.controllers;
 
 
+import io.swagger.v3.oas.annotations.Parameter;
 import judamov.sipoh.dto.EmailRequestDTO;
 import judamov.sipoh.repository.IEmailRepository;
 import judamov.sipoh.service.impl.EmailServiceImpl;
@@ -18,7 +19,7 @@ public class EmailController {
 
     @PostMapping("/send-credentials")
     public ResponseEntity<Boolean> sendCredentials(
-            @RequestHeader Long userId,
+            @Parameter(hidden = true) @RequestHeader Long userId,
             @RequestBody EmailRequestDTO request) {
         return ResponseEntity.ok(emailService.sendEmail(userId, request));
     }

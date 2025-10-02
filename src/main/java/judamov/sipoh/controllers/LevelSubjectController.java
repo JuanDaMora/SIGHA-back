@@ -1,5 +1,6 @@
 package judamov.sipoh.controllers;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import judamov.sipoh.dto.LevelSubjectDTO;
 import judamov.sipoh.service.impl.LevelSubjectServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,7 @@ public class LevelSubjectController {
 
     @GetMapping
     public ResponseEntity<List<LevelSubjectDTO>> getAll(
-            @RequestHeader Long userId){
+            @Parameter(hidden = true) @RequestHeader Long userId){
         return ResponseEntity.ok(levelSubjectService.getAll(userId));
     }
 }

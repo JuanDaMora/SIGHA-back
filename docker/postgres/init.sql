@@ -1,5 +1,5 @@
 CREATE SCHEMA IF NOT EXISTS sigha;
-SET search_path TO sigha;
+    SET search_path TO sigha;
 
 CREATE TABLE email_templates (
     id SERIAL PRIMARY KEY,
@@ -152,6 +152,19 @@ CREATE TABLE IF NOT EXISTS schedule(
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
+
+
+CREATE TABLE IF NOT EXISTS sigha.individual_availability (
+                                                             id SERIAL PRIMARY KEY,
+                                                             id_user INTEGER NOT NULL REFERENCES "user"(id),
+    id_semester INTEGER NOT NULL REFERENCES semester(id),
+    is_active BOOLEAN not null default true,
+    creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+ALTER TABLE sigha.individual_availability
+    ADD CONSTRAINT unique_user_semester UNIQUE (id_user, id_semester);
+
 -- Datos base
 INSERT INTO roles (name) VALUES
                              ('DIRECTOR DE ESCUELA'),
