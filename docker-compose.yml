@@ -19,6 +19,8 @@ services:
       SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD}
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: true
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: true
+      SIGHA_URL_ACCESS: ${SIGHA_URL_ACCESS}
+
 
     restart: unless-stopped
 networks:
