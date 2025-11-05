@@ -24,9 +24,7 @@ public class AuthPublicController {
 //    public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request){
 //        return ResponseEntity.ok(authServiceImpl.register(request));
 //    }
-// ============================================================
-// ENVÍO DE RECUPERACIÓN DE CONTRASEÑA
-// ============================================================
+
     @PostMapping("/send-recovery")
     public ResponseEntity<Boolean> sendRecovery(
             @RequestBody RecoveryPasswordRequestDTO request) {
