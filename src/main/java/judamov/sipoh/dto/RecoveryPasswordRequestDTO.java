@@ -11,5 +11,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class RecoveryPasswordRequestDTO {
     private String documento;
-    private boolean isFake;
+    private boolean fake;
 }
