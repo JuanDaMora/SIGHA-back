@@ -77,6 +77,7 @@ public class EmailServiceImpl {
         if(!isFake){
             // 2. Guardar en DB (hasheada)
             user.setPassword(passwordEncoder.encode(newPassword));
+            user.setTokenHash(null);
             userRepository.save(user);
         }
 
