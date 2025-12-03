@@ -52,7 +52,17 @@ public class AvailabilityController {
         return ResponseEntity.ok(dto);
     }
 
+    @PostMapping()
+    public ResponseEntity<Boolean> postAvailability(
+            @Parameter(hidden = true) @RequestHeader Long userId,
+            @RequestHeader Long semesterId,
+            @RequestBody AvailabilityDTO availabilityDTO){
+        return ResponseEntity.ok(availabilityService.createAvailability(userId,semesterId,availabilityDTO));
+    }
+
     // ----------------- INDIVIDUAL AVAILABILITY -----------------
+
+
 
     @PostMapping("/individual")
     public ResponseEntity<IndividualAvailabilityDTO> upsertIndividualAvailability(
