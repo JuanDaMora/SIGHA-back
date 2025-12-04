@@ -34,6 +34,65 @@ public class AvailabilityServiceImpl implements IAvailabilityService {
     private final IStatusAvailabilityRepository statusAvailabilityRepository;
     private final UserRolServiceImpl userRolService;
     private final IUserAreaRepository userAreaRepository;
+    private final ISubjectRepository subjectRepository;
+
+
+    @Override
+    public List<GlobalAvabilityDTO> getGlobalAvailabilityBySubjects(Long semesterId,
+                                                                    Long userId,
+                                                                    List<Long> subjectIds) {
+
+        validateAdminAccess(userId);
+        Semester semester = getSemesterById(semesterId);
+
+        // Si no manda materias -> devolver todos los docentes con availability
+        if (subjectIds == null || subjectIds.isEmpty()) {
+            return getListGlobalAvailability(semesterId, userId);
+        }
+
+        // 1. Obtener las asignaturas seleccionadas
+        List<Subject> subjects = subjectRepository.findAllById(subjectIds);
+
+        if (subjects.isEmpty()) {
+            throw new GenericAppException(HttpStatus.NOT_FOUND,
+                    "No se encontraron asignaturas para los IDs enviados");
+        }
+
+        // 2. Extraer las áreas asociadas a esas asignaturas
+        List<Long> areaIds = subjects.stream()
+                .map(s -> s.getArea().getId())
+                .distinct()
+                .toList();
+
+        // 3. Traer todos los docentes que pertenezcan a esas áreas
+        List<Long> docentesIds = userAreaRepository.findDocentsByAreaIds(areaIds);
+
+        if (docentesIds.isEmpty()) {
+            return List.of(); // sin docentes → lista vacía
+        }
+
+        // 4. Para cada docente traer su availability
+        List<GlobalAvabilityDTO> result = new ArrayList<>();
+
+        for (Long docenteId : docentesIds) {
+
+            User docente = getUserById(docenteId);
+
+            List<Availability> availabilityList =
+                    availabilityRepository.findByUserAndSemester(docente, semester)
+                            .orElse(Collections.emptyList());
+
+            GlobalAvabilityDTO dto = buildGlobalAvailabilityDTO(docente.getId(), availabilityList);
+            if (availabilityList.isEmpty()) {
+                continue; // no tiene disponibilidad -> no se agrega
+            }
+
+            result.add(dto);
+        }
+
+        return result;
+    }
+
 
     /**
      * Consulta la disponibilidad detallada de un docente específico para un semestre.

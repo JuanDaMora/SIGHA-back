@@ -38,7 +38,7 @@ public class GroupController {
     @GetMapping("/by-subject")
     public ResponseEntity<List<GroupDTO>> getAllBySubject(
             @RequestParam Long subjectId,
-            @RequestHeader Long semesterId,
+            @RequestParam(required = true)  Long semesterId,
             @Parameter(hidden = true) @RequestHeader Long userId) {
         List<GroupDTO> groups = groupService.getAllBySubject(subjectId, userId, semesterId);
         return ResponseEntity.ok(groups);
