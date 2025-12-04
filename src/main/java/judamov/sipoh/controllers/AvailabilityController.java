@@ -30,6 +30,17 @@ public class AvailabilityController {
         return ResponseEntity.ok(availabilityService.getListGlobalAvailability(semesterId, userId));
     }
 
+    @GetMapping("/global/by-subjects")
+    public ResponseEntity<List<GlobalAvabilityDTO>> getGlobalAvailabilityBySubjects(
+            @RequestParam(required = false) List<Long> subjectIds,
+            @RequestHeader Long semesterId,
+            @Parameter(hidden = true) @RequestHeader Long userId
+    ) {
+        return ResponseEntity.ok(
+                availabilityService.getGlobalAvailabilityBySubjects(semesterId, userId, subjectIds)
+        );
+    }
+
     @GetMapping("/global/{docentId}")
     public ResponseEntity<GlobalAvabilityDTO> getGlobalAvailability(
             @RequestHeader Long semesterId,
