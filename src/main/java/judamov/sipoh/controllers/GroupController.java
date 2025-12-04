@@ -53,6 +53,19 @@ public class GroupController {
         return ResponseEntity.ok(groups);
     }
 
+    @GetMapping("/by-filters")
+    public ResponseEntity<List<GroupDTO>> getAllByFilters(
+            @RequestParam(required = false) List<Long> idLevels,
+            @RequestParam(required = false) List<Long> docentesIds,
+            @RequestParam(required = false) List<Long> subjectIds,
+            @RequestParam(required = true)  Long semesterId,
+            @Parameter(hidden = true) @RequestHeader Long userId) {
+
+        List<GroupDTO> groups = groupService.getAllByFilters(idLevels, docentesIds, subjectIds, userId, semesterId);
+        return ResponseEntity.ok(groups);
+    }
+
+
     @PutMapping("/{groupId}")
     public ResponseEntity<Boolean> updateGroup(
             @PathVariable Long groupId,

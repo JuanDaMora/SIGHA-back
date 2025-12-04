@@ -27,6 +27,61 @@ public class GroupServiceImpl implements IGroupService {
     private final IScheduleRepository scheduleRepository;
     private final IScheduleService scheduleService;
 
+
+    @Override
+    public List<GroupDTO> getAllByFilters(List<Long> idLevels,
+                                          List<Long> docentesIds,
+                                          List<Long> subjectIds,
+                                          Long adminId,
+                                          Long semesterId) {
+
+        validateAdminAccess(adminId);
+
+        Semester semester = semesterRepository.findById(semesterId)
+                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND,
+                        "El semestre con id " + semesterId + " no existe"));
+
+        // 1. Traer todos los grupos del semestre
+        List<Group> groups = groupRepository.findBySemester(semester);
+
+        // 2. Si NO hay filtros → devolver todos los grupos del semestre
+        boolean noLevelFilter   = (idLevels == null || idLevels.isEmpty());
+        boolean noDocenteFilter = (docentesIds == null || docentesIds.isEmpty());
+        boolean noSubjectFilter = (subjectIds == null || subjectIds.isEmpty());
+
+        if (noLevelFilter && noDocenteFilter && noSubjectFilter) {
+            return mapWithSchedules(groups);
+        }
+
+        // 3. Aplicar filtros SOLO a los criterios enviados
+        List<Group> filtered = groups.stream()
+                .filter(group -> {
+
+                    // Filtro nivel
+                    boolean matchesLevel = noLevelFilter ||
+                            (group.getSubject() != null &&
+                                    group.getSubject().getLevelSubject() != null &&
+                                    idLevels.contains(group.getSubject().getLevelSubject().getId()));
+
+                    // Filtro docente
+                    boolean matchesDocente = noDocenteFilter ||
+                            (group.getDocente() != null &&
+                                    docentesIds.contains(group.getDocente().getId()));
+
+                    // Filtro asignatura
+                    boolean matchesSubject = noSubjectFilter ||
+                            (group.getSubject() != null &&
+                                    subjectIds.contains(group.getSubject().getId()));
+
+                    return matchesLevel && matchesDocente && matchesSubject;
+                })
+                .toList();
+
+        // No lanzar error si no hay resultados: depende de tu front.
+        return mapWithSchedules(filtered);
+    }
+
+
     /**
      * Obtiene todos los grupos de un semestre específico.
      *
