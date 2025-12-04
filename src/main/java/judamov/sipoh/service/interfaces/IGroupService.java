@@ -20,4 +20,5 @@ public interface IGroupService {
     Boolean updateGroup(Long groupId, GroupUpdateDTO dto, Long adminId, Long semesterId);
     Boolean createGroupsBulk(List<GroupCreateDTO> dtos, Long adminId, Long semesterId) ;
     Boolean deleteAllGroupsBySemesterId (Long userId, Long semesterId);
+    List<GroupDTO> getAllByFilters(List<Long> idLevels, List<Long> docentesIds, List<Long> subjectIds, Long adminId,Long semesterId);
 }
