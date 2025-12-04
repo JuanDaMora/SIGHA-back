@@ -26,4 +26,7 @@ public interface IAvailabilityService {
     void saveNewAvailabilityBlocks(AvailabilityDTO dto, User user, Semester semester,
                                    Map<String, AvailabilityBlockDTO> incomingMap,
                                    StatusAvailability defaultStatus);
+    List<GlobalAvabilityDTO> getGlobalAvailabilityBySubjects(Long semesterId,
+                                                                    Long userId,
+                                                                    List<Long> subjectIds);
 }
