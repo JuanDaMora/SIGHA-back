@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -26,6 +27,47 @@ public class GroupServiceImpl implements IGroupService {
     private final ISemesterRepository semesterRepository;
     private final IScheduleRepository scheduleRepository;
     private final IScheduleService scheduleService;
+
+    /**
+     * Válida que el docente no tenga ya otro grupo en los mismos bloques horarios
+     * dentro del mismo semestre.
+     */
+    private void validateDocenteScheduleConflict(
+            User docente,
+            Semester semester,
+            List<ScheduleDTO> scheduleList
+    ) {
+        if (docente == null || scheduleList == null || scheduleList.isEmpty()) {
+            return;
+        }
+
+        List<String> conflicts = new java.util.ArrayList<>();
+
+        for (ScheduleDTO block : scheduleList) {
+            LocalTime startTime = LocalTime.of(block.getHour(), 0);
+
+            boolean exists = scheduleRepository
+                    .existsByGroupDocenteAndGroupSemesterAndDayAndStartTime(
+                            docente,
+                            semester,
+                            block.getDay(),
+                            startTime
+                    );
+
+            if (exists) {
+                conflicts.add(
+                        String.format("%s %02d:00", block.getDay().name(), block.getHour())
+                );
+            }
+        }
+
+        // Si hubo conflictos, lanzar UNA SOLA excepción con todos
+        if (!conflicts.isEmpty()) {
+            String joined = String.join("\n- ", conflicts);
+            String msg = "El docente tiene conflictos de horario:\n- " + joined;
+            throw new GenericAppException(HttpStatus.CONFLICT, msg);
+        }
+    }
 
 
     @Override
@@ -182,29 +224,31 @@ public class GroupServiceImpl implements IGroupService {
 
         Semester semester = semesterRepository.findById(semesterId)
                 .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Semestre no encontrado"));
-        Group group = new Group();
-        if(dto.getIdDocente() != null) {
-            User user2 = userRepository.findById(dto.getIdDocente())
+
+        User docente = null;
+        if (dto.getIdDocente() != null) {
+            docente = userRepository.findById(dto.getIdDocente())
                     .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
-
-            User user = getUserById(dto.getIdDocente()) ;
-            group.setDocente(user);
         }
-
+        //Validar conflicto de horarios ANTES de crear el grupo y los schedules
+        validateDocenteScheduleConflict(docente, semester, dto.getScheduleList());
+        Group group = new Group();
         group.setCode(dto.getCode());
         group.setSemester(semester);
         group.setSubject(subject);
+        group.setDocente(docente);
         group.setMax_students(dto.getMax_students());
         group.setEnrolled(dto.getEnrolled());
 
-
         Group savedGroup = groupRepository.save(group);
+
         ScheduleCreateDTO scheduleCreateDTO = new ScheduleCreateDTO(
                 savedGroup.getId(),
-                dto.getIdDocente() != null ? savedGroup.getDocente().getId() : null,
+                docente != null ? docente.getId() : null,
                 dto.getScheduleList()
         );
-        scheduleService.createSchedule(scheduleCreateDTO,adminId);
+        scheduleService.createSchedule(scheduleCreateDTO, adminId);
+
         return true;
     }
     @Override

@@ -4,7 +4,11 @@ import judamov.sipoh.dto.GroupCreateDTO;
 import judamov.sipoh.dto.GroupDTO;
 import judamov.sipoh.dto.GroupUpdateDTO;
 import judamov.sipoh.entity.Group;
+import judamov.sipoh.entity.Semester;
+import judamov.sipoh.entity.User;
+import judamov.sipoh.enums.DayOfWeekEnum;
 
+import java.time.LocalTime;
 import java.util.List;
 
 public interface IGroupService {
