@@ -17,6 +17,8 @@ public class GroupDTO {
     private Long id;
     private Long idSemestre;
     private Long idSubject;
+    private String codeSubject;
+    private String nameSubject;
     private Long idDocente;
     private Long idLevel;
     private String levelName;
