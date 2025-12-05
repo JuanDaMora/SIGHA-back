@@ -16,5 +16,20 @@ import java.util.Optional;
 public interface IScheduleRepository extends JpaRepository<Schedule,Long> {
     Optional<List<Schedule>> findByGroup(Group group);
     void deleteByGroupIn(List<Group> groups);
-    boolean existsByGroupDocenteAndGroupSemesterAndDayAndStartTime(User docente, Semester semester, DayOfWeekEnum day, LocalTime startTime);
+    // Para crear (no hay grupo previo que excluir)
+    boolean existsByGroupDocenteAndGroupSemesterAndDayAndStartTime(
+            User docente,
+            Semester semester,
+            DayOfWeekEnum day,
+            LocalTime startTime
+    );
+
+    // Para actualizar (excluir el mismo grupo)
+    boolean existsByGroupDocenteAndGroupSemesterAndDayAndStartTimeAndGroupIdNot(
+            User docente,
+            Semester semester,
+            DayOfWeekEnum day,
+            LocalTime startTime,
+            Long groupId
+    );
 }
