@@ -16,6 +16,8 @@ public class GroupMapper {
                 .code(group.getCode())
                 .idSemestre(group.getSemester() != null ? group.getSemester().getId() : null)
                 .idSubject(group.getSubject() != null ? group.getSubject().getId() : null)
+                .codeSubject(group.getSubject() != null ? group.getSubject().getCodigo() : null)
+                .nameSubject(group.getSubject() != null ? group.getSubject().getName() : null)
                 .idDocente(group.getDocente() != null ? group.getDocente().getId() : null)
                 .max_students(group.getMax_students() != null ? group.getMax_students() : null)
                 .enrolled(group.getEnrolled() != null ? group.getEnrolled() : null)
