@@ -85,8 +85,15 @@ public class GroupServiceImpl implements IGroupService {
         }
 
         if (!conflicts.isEmpty()) {
+
+            String docenteNombre = docente.getFirstName() + " " + docente.getLastName();
             String joined = String.join("\n- ", conflicts);
-            String msg = "El docente tiene conflictos de horario:\n- " + joined;
+
+            String msg = String.format(
+                    "El docente %s tiene conflictos de horario:\n- %s",
+                    docenteNombre,
+                    joined
+            );
             throw new GenericAppException(HttpStatus.CONFLICT, msg);
         }
     }
