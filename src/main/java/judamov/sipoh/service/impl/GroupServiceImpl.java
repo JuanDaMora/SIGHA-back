@@ -72,11 +72,9 @@ public class GroupServiceImpl implements IGroupService {
                     docenteNombre,
                     joined
             );
-
             throw new GenericAppException(HttpStatus.CONFLICT, msg);
         }
     }
-
 
 
     @Override
