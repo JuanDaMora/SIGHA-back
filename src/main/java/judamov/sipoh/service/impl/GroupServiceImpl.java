@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -32,27 +33,49 @@ public class GroupServiceImpl implements IGroupService {
      * Válida que el docente no tenga ya otro grupo en los mismos bloques horarios
      * dentro del mismo semestre.
      */
+
+    /**
+     * Valida que el docente no tenga ya otros grupos en los mismos bloques
+     * horarios dentro del semestre. Si excludeGroupId != null, ignora ese grupo
+     * (para el caso de update).
+     */
     private void validateDocenteScheduleConflict(
             User docente,
             Semester semester,
-            List<ScheduleDTO> scheduleList
+            List<ScheduleDTO> scheduleList,
+            Long excludeGroupId
     ) {
         if (docente == null || scheduleList == null || scheduleList.isEmpty()) {
             return;
         }
 
-        List<String> conflicts = new java.util.ArrayList<>();
+        List<String> conflicts = new ArrayList<>();
 
         for (ScheduleDTO block : scheduleList) {
             LocalTime startTime = LocalTime.of(block.getHour(), 0);
 
-            boolean exists = scheduleRepository
-                    .existsByGroupDocenteAndGroupSemesterAndDayAndStartTime(
-                            docente,
-                            semester,
-                            block.getDay(),
-                            startTime
-                    );
+            boolean exists;
+
+            if (excludeGroupId == null) {
+                // CREATE
+                exists = scheduleRepository
+                        .existsByGroupDocenteAndGroupSemesterAndDayAndStartTime(
+                                docente,
+                                semester,
+                                block.getDay(),
+                                startTime
+                        );
+            } else {
+                // UPDATE → ignorar el mismo grupo
+                exists = scheduleRepository
+                        .existsByGroupDocenteAndGroupSemesterAndDayAndStartTimeAndGroupIdNot(
+                                docente,
+                                semester,
+                                block.getDay(),
+                                startTime,
+                                excludeGroupId
+                        );
+            }
 
             if (exists) {
                 conflicts.add(
@@ -61,10 +84,16 @@ public class GroupServiceImpl implements IGroupService {
             }
         }
 
-        // Si hubo conflictos, lanzar UNA SOLA excepción con todos
         if (!conflicts.isEmpty()) {
+
+            String docenteNombre = docente.getFirstName() + " " + docente.getLastName();
             String joined = String.join("\n- ", conflicts);
-            String msg = "El docente tiene conflictos de horario:\n- " + joined;
+
+            String msg = String.format(
+                    "El docente %s tiene conflictos de horario:\n- %s",
+                    docenteNombre,
+                    joined
+            );
             throw new GenericAppException(HttpStatus.CONFLICT, msg);
         }
     }
@@ -231,7 +260,8 @@ public class GroupServiceImpl implements IGroupService {
                     .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
         }
         //Validar conflicto de horarios ANTES de crear el grupo y los schedules
-        validateDocenteScheduleConflict(docente, semester, dto.getScheduleList());
+        validateDocenteScheduleConflict(docente, semester, dto.getScheduleList(), null);
+
         Group group = new Group();
         group.setCode(dto.getCode());
         group.setSemester(semester);
@@ -297,13 +327,15 @@ public class GroupServiceImpl implements IGroupService {
 
         User docente = (dto.getIdDocente() != null) ? getUserById(dto.getIdDocente()) : null;
 
+        // si vienen horarios, validar conflictos excluyendo este mismo grupo
+        if (dto.getScheduleList() != null && !dto.getScheduleList().isEmpty()) {
+            validateDocenteScheduleConflict(docente, semester, dto.getScheduleList(), groupId);
 
-        if(!dto.getScheduleList().isEmpty()){
-            ScheduleCreateDTO scheduleCreateDTO=ScheduleCreateDTO.builder()
+            ScheduleCreateDTO scheduleCreateDTO = ScheduleCreateDTO.builder()
                     .idGroup(groupId)
                     .scheduleList(dto.getScheduleList())
                     .build();
-            scheduleService.createSchedule(scheduleCreateDTO,adminId);
+            scheduleService.createSchedule(scheduleCreateDTO, adminId);
         }
 
         group.setCode(dto.getCode());
@@ -316,6 +348,7 @@ public class GroupServiceImpl implements IGroupService {
         groupRepository.save(group);
         return true;
     }
+
 
 
 
