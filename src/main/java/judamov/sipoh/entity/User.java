@@ -21,7 +21,7 @@ import java.util.List;
 @AllArgsConstructor
 @Transactional
 @Entity
-@Table(name="user", uniqueConstraints = {@UniqueConstraint(columnNames= {"documento"})})
+@Table(name="user", schema="core", uniqueConstraints = {@UniqueConstraint(columnNames= {"documento"})})
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

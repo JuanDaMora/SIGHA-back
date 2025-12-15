@@ -4,12 +4,19 @@ import judamov.sipoh.dto.UserBasicUpdateDTO;
 import judamov.sipoh.dto.UserDTO;
 import judamov.sipoh.entity.TypeDocument;
 import judamov.sipoh.entity.User;
+import judamov.sipoh.entity.UserRol;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class UserMapper {
 
-    public static UserDTO userToUserDTO(User user) {
+    /**
+     * Convierte User a UserDTO filtrando roles por programa específico.
+     * IMPORTANTE: Este es el único método válido para convertir User a UserDTO.
+     * Siempre debe recibir la lista de roles filtrados por programa.
+     */
+    public static UserDTO userToUserDTO(User user, List<UserRol> filteredUserRoles) {
         if (user == null) return null;
 
         return UserDTO.builder()
@@ -20,11 +27,10 @@ public class UserMapper {
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .isActive(user.getActive())
-                .idsRoles(user.getUserRoles().stream()
+                .idsRoles(filteredUserRoles.stream()
                         .map(userRol -> userRol.getRole().getId())
                         .toList())
-                .rolesDescriptions(user.getUserRoles()
-                        .stream()
+                .rolesDescriptions(filteredUserRoles.stream()
                         .map(userRol -> userRol.getRole().getName())
                         .collect(Collectors.toList()))
                 .createAt(user.getCreatedAt())

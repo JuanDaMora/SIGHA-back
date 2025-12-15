@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
-@Table(name = "type_document")
+@Table(name = "type_document", schema = "core")
 @Transactional
 public class TypeDocument {
     @Id

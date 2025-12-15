@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Transactional
 @Entity
-@Table(name="status_availability")
+@Table(name="status_availability", schema = "core")
 public class StatusAvailability {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

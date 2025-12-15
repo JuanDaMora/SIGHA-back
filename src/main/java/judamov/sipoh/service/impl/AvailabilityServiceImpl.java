@@ -10,6 +10,7 @@ import judamov.sipoh.exceptions.GenericAppException;
 import judamov.sipoh.repository.*;
 import judamov.sipoh.service.interfaces.IAvailabilityService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +36,10 @@ public class AvailabilityServiceImpl implements IAvailabilityService {
     private final UserRolServiceImpl userRolService;
     private final IUserAreaRepository userAreaRepository;
     private final ISubjectRepository subjectRepository;
+    private final IProgramRepository programRepository;
+    
+    @Value("${spring.jpa.properties.hibernate.default_schema:ing_sistemas}")
+    private String currentSchema;
 
 
     @Override
@@ -233,8 +238,9 @@ public class AvailabilityServiceImpl implements IAvailabilityService {
     public void deleteObsoleteAvailability(List<Availability> currentAvailability,
                                            Map<String, AvailabilityBlockDTO> incomingMap, Long userRequestId) {
         User userRequest = getUserById(userRequestId);
-        List<UserRol> userRolesRequest = userRoleRepository.findAllByUser(userRequest)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Roles del usuario no encontrados"));
+        Program currentProgram = getCurrentProgram();
+        List<UserRol> userRolesRequest = userRoleRepository.findAllByUserAndProgram(userRequest, currentProgram)
+                .orElse(new ArrayList<>());
 
         boolean isAdmin = userRolesRequest.stream().noneMatch(r -> r.getRole().getName().contains("PROFESOR"));
 
@@ -299,6 +305,12 @@ public class AvailabilityServiceImpl implements IAvailabilityService {
         availability.setStatusAvailability(newStatus);
         availabilityRepository.save(availability);
         return true;
+    }
+    
+    private Program getCurrentProgram() {
+        return programRepository.findByCode(currentSchema)
+                .orElseThrow(() -> new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR,
+                        "Programa no encontrado para el schema: " + currentSchema));
     }
 
 }
