@@ -14,6 +14,13 @@ import java.util.List;
 public interface IGroupService {
     List<GroupDTO> getAllBySemester(Long adminId, Long semesterId);
 
+    /**
+     * Obtiene todos los grupos de todos los programas para un semestre,
+     * usando la vista core.v_all_groups_by_semester. Incluye la
+     * clasificación por programa/escuela.
+     */
+    List<GroupDTO> getAllBySemesterAllPrograms(Long adminId, Long semesterId);
+
     List<GroupDTO> getAllByLevels(List<Long> idLevel, Long adminId, Long semesterId);
 
     List<GroupDTO> getAllBySubject(Long subjectId, Long adminId, Long semesterId);
@@ -25,4 +32,16 @@ public interface IGroupService {
     Boolean createGroupsBulk(List<GroupCreateDTO> dtos, Long adminId, Long semesterId) ;
     Boolean deleteAllGroupsBySemesterId (Long userId, Long semesterId);
     List<GroupDTO> getAllByFilters(List<Long> idLevels, List<Long> docentesIds, List<Long> subjectIds, Long adminId,Long semesterId);
+
+    /**
+     * Versión multi-programa de getAllByFilters, usando la vista
+     * core.v_all_groups_by_semester. Aplica los mismos filtros
+     * (niveles, docentes, materias) pero sobre todos los programas.
+     */
+    List<GroupDTO> getAllByFiltersAllPrograms(List<Long> idLevels,
+                                              List<Long> docentesIds,
+                                              List<Long> subjectIds,
+                                              List<String> programCodes,
+                                              Long adminId,
+                                              Long semesterId);
 }

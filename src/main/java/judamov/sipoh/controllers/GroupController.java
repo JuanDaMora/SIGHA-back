@@ -26,6 +26,20 @@ public class GroupController {
         return ResponseEntity.ok(groups);
     }
 
+    /**
+     * Devuelve todos los grupos de un semestre para todos los programas,
+     * usando la vista core.v_all_groups_by_semester. Incluye, además de
+     * la información habitual del grupo, los campos de programa y escuela.
+     */
+    @GetMapping("/by-semesters/all-programs")
+    public ResponseEntity<List<GroupDTO>> getAllBySemestersAllPrograms(
+            @RequestHeader Long semesterId,
+            @Parameter(hidden = true) @RequestHeader Long userId
+    ) {
+        List<GroupDTO> groups = groupService.getAllBySemesterAllPrograms(userId, semesterId);
+        return ResponseEntity.ok(groups);
+    }
+
     @GetMapping("/by-levels")
     public ResponseEntity<List<GroupDTO>> getAllByLevels(
             @RequestParam List<Long> idLevels,
@@ -62,6 +76,33 @@ public class GroupController {
             @Parameter(hidden = true) @RequestHeader Long userId) {
 
         List<GroupDTO> groups = groupService.getAllByFilters(idLevels, docentesIds, subjectIds, userId, semesterId);
+        return ResponseEntity.ok(groups);
+    }
+
+    /**
+     * Versión multi-programa de /by-filters. Aplica los mismos filtros
+     * (niveles, docentes, materias) pero usando la vista
+     * core.v_all_groups_by_semester, devolviendo además la
+     * clasificación por programa y escuela.
+     */
+    @GetMapping("/by-filters/all-programs")
+    public ResponseEntity<List<GroupDTO>> getAllByFiltersAllPrograms(
+            @RequestParam(required = false) List<Long> idLevels,
+            @RequestParam(required = false) List<Long> docentesIds,
+            @RequestParam(required = false) List<Long> subjectIds,
+            @RequestParam(required = false) List<String> programCodes,
+            @RequestParam(required = true) Long semesterId,
+            @Parameter(hidden = true) @RequestHeader Long userId
+    ) {
+
+        List<GroupDTO> groups = groupService.getAllByFiltersAllPrograms(
+                idLevels,
+                docentesIds,
+                subjectIds,
+                programCodes,
+                userId,
+                semesterId
+        );
         return ResponseEntity.ok(groups);
     }
 
