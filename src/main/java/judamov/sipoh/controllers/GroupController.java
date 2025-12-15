@@ -91,7 +91,7 @@ public class GroupController {
             @RequestParam(required = false) List<Long> docentesIds,
             @RequestParam(required = false) List<Long> subjectIds,
             @RequestParam(required = false) List<String> programCodes,
-            @RequestParam(required = true) Long semesterId,
+            @RequestHeader Long semesterId,
             @Parameter(hidden = true) @RequestHeader Long userId
     ) {
 
