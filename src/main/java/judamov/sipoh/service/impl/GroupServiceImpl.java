@@ -171,6 +171,59 @@ public class GroupServiceImpl implements IGroupService {
         return mapWithSchedules(groups);
     }
 
+    @Override
+    public List<GroupDTO> getAllBySemesterAllPrograms(Long adminId, Long semesterId) {
+        validateAdminAccess(adminId);
+
+        List<Object[]> rows = groupRepository.findAllProgramsBySemester(semesterId);
+
+        return rows.stream()
+                .map(this::mapRowToGroupDTO)
+                .toList();
+    }
+
+    @Override
+    public List<GroupDTO> getAllByFiltersAllPrograms(List<Long> idLevels,
+                                                     List<Long> docentesIds,
+                                                     List<Long> subjectIds,
+                                                     List<String> programCodes,
+                                                     Long adminId,
+                                                     Long semesterId) {
+        validateAdminAccess(adminId);
+
+        List<Object[]> rows = groupRepository.findAllProgramsBySemester(semesterId);
+        List<GroupDTO> all = rows.stream()
+                .map(this::mapRowToGroupDTO)
+                .toList();
+
+        boolean noLevelFilter    = (idLevels == null || idLevels.isEmpty());
+        boolean noDocenteFilter  = (docentesIds == null || docentesIds.isEmpty());
+        boolean noSubjectFilter  = (subjectIds == null || subjectIds.isEmpty());
+        boolean noProgramFilter  = (programCodes == null || programCodes.isEmpty());
+
+        if (noLevelFilter && noDocenteFilter && noSubjectFilter && noProgramFilter) {
+            return all;
+        }
+
+        return all.stream()
+                .filter(dto -> {
+                    boolean matchesLevel = noLevelFilter ||
+                            (dto.getIdLevel() != null && idLevels.contains(dto.getIdLevel()));
+
+                    boolean matchesDocente = noDocenteFilter ||
+                            (dto.getIdDocente() != null && docentesIds.contains(dto.getIdDocente()));
+
+                    boolean matchesSubject = noSubjectFilter ||
+                            (dto.getIdSubject() != null && subjectIds.contains(dto.getIdSubject()));
+
+                    boolean matchesProgram = noProgramFilter ||
+                            (dto.getProgramCode() != null && programCodes.contains(dto.getProgramCode()));
+
+                    return matchesLevel && matchesDocente && matchesSubject && matchesProgram;
+                })
+                .toList();
+    }
+
     /**
      * Obtiene los grupos cuyo nivel esté incluido en la lista de niveles.
      *
@@ -414,6 +467,60 @@ public class GroupServiceImpl implements IGroupService {
         });
 
         return groupDTOList;
+    }
+
+    /**
+     * Mapea una fila devuelta por la vista core.v_all_groups_by_semester
+     * a un GroupDTO, incluyendo los campos de programa/escuela.
+     *
+     * Orden esperado de las columnas (Object[] row):
+     * 0: id
+     * 1: id_semestre
+     * 2: id_subject
+     * 3: code_subject
+     * 4: name_subject
+     * 5: id_docente
+     * 6: id_level
+     * 7: level_name
+     * 8: code
+     * 9: max_students
+     * 10: enrolled
+     * 11: program_code
+     * 12: program_name
+     * 13: escuela
+     */
+    private GroupDTO mapRowToGroupDTO(Object[] row) {
+        GroupDTO dto = new GroupDTO();
+
+        dto.setId(getLong(row[0]));
+        dto.setIdSemestre(getLong(row[1]));
+        dto.setIdSubject(getLong(row[2]));
+        dto.setCodeSubject((String) row[3]);
+        dto.setNameSubject((String) row[4]);
+        dto.setIdDocente(getLong(row[5]));
+        dto.setIdLevel(getLong(row[6]));
+        dto.setLevelName((String) row[7]);
+        dto.setCode((String) row[8]);
+        dto.setMax_students((String) row[9]);
+        dto.setEnrolled((String) row[10]);
+        dto.setProgramCode((String) row[11]);
+        dto.setProgramName((String) row[12]);
+        dto.setEscuela((String) row[13]);
+
+        // La vista no incluye horarios; dejamos la lista vacía para mantener la forma del DTO.
+        dto.setScheduleList(List.of());
+
+        return dto;
+    }
+
+    private Long getLong(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Number number) {
+            return number.longValue();
+        }
+        return Long.parseLong(value.toString());
     }
 
     /**

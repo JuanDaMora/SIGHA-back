@@ -25,5 +25,22 @@ public class GroupDTO {
     private String code;
     private String max_students;
     private String enrolled;
+    /**
+     * Código interno del programa/escuela (por ejemplo: ING_SISTEMAS).
+     * Se usa únicamente en el endpoint global que consulta la vista
+     * multi-programa; en los endpoints actuales puede venir en null.
+     */
+    private String programCode;
+
+    /**
+     * Nombre legible del programa (por ejemplo: Ingeniería de Sistemas).
+     */
+    private String programName;
+
+    /**
+     * Nombre de la escuela/facultad a la que pertenece el programa.
+     */
+    private String escuela;
+
     private List<ScheduleDTO> scheduleList;
 }

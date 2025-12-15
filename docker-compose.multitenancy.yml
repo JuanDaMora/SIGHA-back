@@ -25,6 +25,7 @@ services:
       SPRING_MAIL_PASSWORD: hbkhhjqihudzcakl
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "true"
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
+      EMAIL_FAKE_DESTINATION: sigha.notifications@gmail.com
       SPRING_JACKSON_TIME_ZONE: America/Bogota
       SIGHA_URL_ACCESS: ${SIGHA_URL_ACCESS:-http://localhost}
     restart: unless-stopped
@@ -55,6 +56,7 @@ services:
       SPRING_MAIL_PASSWORD: hbkhhjqihudzcakl
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "true"
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
+      EMAIL_FAKE_DESTINATION: sigha.notifications@gmail.com
       SPRING_JACKSON_TIME_ZONE: America/Bogota
       SIGHA_URL_ACCESS: ${SIGHA_URL_ACCESS:-http://localhost}
     restart: unless-stopped
@@ -85,6 +87,7 @@ services:
       SPRING_MAIL_PASSWORD: hbkhhjqihudzcakl
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "true"
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
+      EMAIL_FAKE_DESTINATION: sigha.notifications@gmail.com
       SPRING_JACKSON_TIME_ZONE: America/Bogota
       SIGHA_URL_ACCESS: ${SIGHA_URL_ACCESS:-http://localhost}
     restart: unless-stopped
@@ -115,6 +118,7 @@ services:
       SPRING_MAIL_PASSWORD: hbkhhjqihudzcakl
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "true"
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
+      EMAIL_FAKE_DESTINATION: sigha.notifications@gmail.com
       SPRING_JACKSON_TIME_ZONE: America/Bogota
       SIGHA_URL_ACCESS: ${SIGHA_URL_ACCESS:-http://localhost}
     restart: unless-stopped
