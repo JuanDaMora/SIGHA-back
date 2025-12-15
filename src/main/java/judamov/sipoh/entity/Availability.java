@@ -15,7 +15,7 @@ import java.util.Date;
 
 @Entity
 @Data
-@Table(name = "availability")
+@Table(name = "availability", schema = "core")
 @Transactional
 public class Availability {
     @Id

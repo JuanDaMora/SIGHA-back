@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
@@ -18,19 +17,24 @@ import java.time.LocalDateTime;
 @Transactional
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "area", schema = "core")
-public class Area implements Serializable {
+@Table(name = "programs", schema = "core")
+public class Program {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name="description", nullable = false)
-    private String description;
+    
+    @Column(nullable = false)
+    private String name;
+    
+    @Column(nullable = false, unique = true)
+    private String code;
+    
     @CreationTimestamp
     @Column(name = "creation_date", updatable = false)
     private LocalDateTime createdAt;
+    
     @UpdateTimestamp
-    @Column(name= "update_date")
+    @Column(name = "update_date")
     private LocalDateTime updatedAt;
-
-
 }
+

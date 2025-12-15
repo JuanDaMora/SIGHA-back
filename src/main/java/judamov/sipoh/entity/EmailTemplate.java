@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "email_templates")
+@Table(name = "email_templates", schema = "core")
 @Getter
 @Setter
 @NoArgsConstructor

@@ -7,11 +7,13 @@ import judamov.sipoh.exceptions.GenericAppException;
 import judamov.sipoh.mappers.UserMapper;
 import judamov.sipoh.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl {
@@ -33,6 +36,11 @@ public class AuthServiceImpl {
     private final UserRolServiceImpl userRolService;
     private final IAreaRepository areaRepository;
     private final EmailServiceImpl emailService;
+    private final IProgramRepository programRepository;
+    private final IUserRoleRepository userRoleRepository;
+    
+    @Value("${spring.jpa.properties.hibernate.default_schema:ing_sistemas}")
+    private String currentSchema;
 
 
     private static final String CHAR_POOL = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -46,10 +54,18 @@ public class AuthServiceImpl {
      * @return lista de objetos {@link UserDTO}
      */
     public List<UserDTO> getAllUsers() {
-        List<UserDTO> userDTOList= userRepository.findAll()
+        Program currentProgram = getCurrentProgram();
+        
+        List<UserDTO> userDTOList = userRepository.findAll()
                 .stream()
-                .map(UserMapper::userToUserDTO) // usar el mapper aquí
+                .map(user -> {
+                    // Filtrar roles por programa actual
+                    List<UserRol> userRolesForProgram = userRoleRepository.findAllByUserAndProgram(user, currentProgram)
+                            .orElse(new ArrayList<>());
+                    return UserMapper.userToUserDTO(user, userRolesForProgram);
+                })
                 .collect(Collectors.toList());
+        
         for (UserDTO userDTO : userDTOList) {
             // lastLogin
             accessControlRepository.findByUserId(userDTO.getId())
@@ -141,11 +157,12 @@ public class AuthServiceImpl {
                 .active(true)
                 .build();
 
+        Program program = getCurrentProgram();
         List<UserRol> userRoles = request.getIdsRoles().stream().map(roleId -> {
             Role role = roleRepository.findOneById(roleId)
                     .orElseThrow(() -> new GenericAppException(HttpStatus.BAD_REQUEST,
                             "Rol no encontrado con id: " + roleId));
-            return new UserRol(null, user, role, null, null);
+            return new UserRol(null, user, role, program, null, null);
         }).collect(Collectors.toList());
 
         user.setUserRoles(userRoles);
@@ -242,7 +259,12 @@ public class AuthServiceImpl {
         User user = userRepository.findOneById(id)
                 .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
-        UserDTO userDTO = UserMapper.userToUserDTO(user);
+        // Filtrar roles por programa actual
+        Program currentProgram = getCurrentProgram();
+        List<UserRol> userRolesForProgram = userRoleRepository.findAllByUserAndProgram(user, currentProgram)
+                .orElse(new ArrayList<>());
+
+        UserDTO userDTO = UserMapper.userToUserDTO(user, userRolesForProgram);
 
         accessControlRepository.findByUserId(id)
                 .ifPresent(ac -> userDTO.setLastLogin(ac.getLastLogin()));
@@ -257,15 +279,21 @@ public class AuthServiceImpl {
 
     /**
      * Retorna los datos del usuario autenticado sin validaciones de rol.
+     * Filtra roles por el programa actual del backend.
      *
      * @param userId ID del usuario autenticado
      * @return objeto {@link UserDTO} con datos personales, login y áreas
      */
     public UserDTO getOwnUserData(Long userId) {
+        // Filtrar roles por programa actual
+        Program currentProgram = getCurrentProgram();
+        List<UserRol> userRolesForProgram = userRoleRepository.findAllByUserAndProgram(userId, currentProgram.getId())
+                .orElse(new ArrayList<>());
+
         User user = userRepository.findOneById(userId)
                 .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
-        UserDTO userDTO = UserMapper.userToUserDTO(user);
+        UserDTO userDTO = UserMapper.userToUserDTO(user, userRolesForProgram);
 
         accessControlRepository.findByUserId(userId)
                 .ifPresent(ac -> userDTO.setLastLogin(ac.getLastLogin()));
@@ -321,8 +349,9 @@ public class AuthServiceImpl {
             user.getUserRoles().clear();
 
             // Asignar nuevos
+            Program program = getCurrentProgram();
             List<UserRol> nuevosRoles = roles.stream()
-                    .map(role -> new UserRol(null, user, role, null, null))
+                    .map(role -> new UserRol(null, user, role, program, null, null))
                     .toList();
 
             user.getUserRoles().addAll(nuevosRoles);
@@ -413,8 +442,9 @@ public class AuthServiceImpl {
                     .active(true)
                     .build();
 
+            Program program = getCurrentProgram();
             List<UserRol> userRoles = roles.stream()
-                    .map(role -> new UserRol(null, user, role, null, null))
+                    .map(role -> new UserRol(null, user, role, program, null, null))
                     .toList();
 
             user.setUserRoles(userRoles);
@@ -459,5 +489,14 @@ public class AuthServiceImpl {
             password.append(CHAR_POOL.charAt(index));
         }
         return password.toString();
+    }
+    
+    /**
+     * Obtiene el Program correspondiente al schema actual configurado
+     */
+    private Program getCurrentProgram() {
+        return programRepository.findByCode(currentSchema)
+                .orElseThrow(() -> new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR,
+                        "Programa no encontrado para el schema: " + currentSchema));
     }
 }

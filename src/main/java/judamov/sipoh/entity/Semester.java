@@ -16,7 +16,7 @@ import java.util.Date;
 
 @Entity
 @Data
-@Table(name = "semester")
+@Table(name = "semester", schema = "core")
 @Transactional
 @NoArgsConstructor
 @AllArgsConstructor

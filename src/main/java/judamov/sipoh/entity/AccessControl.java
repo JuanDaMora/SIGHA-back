@@ -18,7 +18,7 @@ import java.util.Date;
 @Transactional
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "access_control")
+@Table(name = "access_control", schema = "core")
 public class AccessControl {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,0 +1,13 @@
+# Environment files - NUNCA subir a Git
+.env
+.env.*
+!.env.example
+!env.example
+
+# Logs
+*.log
+
+# Backups temporales
+*.bak
+*.tmp
+
