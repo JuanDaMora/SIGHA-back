@@ -39,28 +39,31 @@ public interface IGroupRepository extends JpaRepository<Group, Long> {
      * 8: code
      * 9: max_students
      * 10: enrolled
-     * 11: program_code
-     * 12: program_name
-     * 13: escuela
+     * 11: program_id
+     * 12: program_code
+     * 13: program_name
+     * 14: escuela
      */
     @Query(value = """
             SELECT
-                id,
-                id_semestre,
-                id_subject,
-                code_subject,
-                name_subject,
-                id_docente,
-                id_level,
-                level_name,
-                code,
-                max_students,
-                enrolled,
-                program_code,
-                program_name,
-                escuela
-            FROM core.v_all_groups_by_semester
-            WHERE id_semestre = :semesterId
+                v.id,
+                v.id_semestre,
+                v.id_subject,
+                v.code_subject,
+                v.name_subject,
+                v.id_docente,
+                v.id_level,
+                v.level_name,
+                v.code,
+                v.max_students,
+                v.enrolled,
+                p.id as program_id,
+                v.program_code,
+                v.program_name,
+                v.escuela
+            FROM core.v_all_groups_by_semester v
+            LEFT JOIN core.programs p ON p.code = v.program_code
+            WHERE v.id_semestre = :semesterId
             """,
             nativeQuery = true)
     List<Object[]> findAllProgramsBySemester(@Param("semesterId") Long semesterId);

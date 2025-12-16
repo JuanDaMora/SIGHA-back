@@ -90,7 +90,7 @@ public class GroupController {
             @RequestParam(required = false) List<Long> idLevels,
             @RequestParam(required = false) List<Long> docentesIds,
             @RequestParam(required = false) List<Long> subjectIds,
-            @RequestParam(required = false) List<String> programCodes,
+            @RequestParam(required = false) List<Long> programIds,
             @RequestHeader Long semesterId,
             @Parameter(hidden = true) @RequestHeader Long userId
     ) {
@@ -99,7 +99,7 @@ public class GroupController {
                 idLevels,
                 docentesIds,
                 subjectIds,
-                programCodes,
+                programIds,
                 userId,
                 semesterId
         );
