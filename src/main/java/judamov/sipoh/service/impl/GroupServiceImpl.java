@@ -1,8 +1,11 @@
 package judamov.sipoh.service.impl;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 import judamov.sipoh.dto.*;
 import judamov.sipoh.entity.*;
+import judamov.sipoh.enums.DayOfWeekEnum;
 import judamov.sipoh.exceptions.GenericAppException;
 import judamov.sipoh.mappers.GroupMapper;
 import judamov.sipoh.mappers.ScheduleMapper;
@@ -16,6 +19,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +33,7 @@ public class GroupServiceImpl implements IGroupService {
     private final ISemesterRepository semesterRepository;
     private final IScheduleRepository scheduleRepository;
     private final IScheduleService scheduleService;
+    private final EntityManager entityManager;
 
     /**
      * Válida que el docente no tenga ya otro grupo en los mismos bloques horarios
@@ -176,9 +182,16 @@ public class GroupServiceImpl implements IGroupService {
         validateAdminAccess(adminId);
 
         List<Object[]> rows = groupRepository.findAllProgramsBySemester(semesterId);
-
-        return rows.stream()
+        List<GroupDTO> all = rows.stream()
                 .map(this::mapRowToGroupDTO)
+                .toList();
+
+        // Cargar horarios para todos los grupos
+        loadSchedulesForDTOs(all);
+
+        // Filtrar grupos que no tienen horarios
+        return all.stream()
+                .filter(dto -> dto.getScheduleList() != null && !dto.getScheduleList().isEmpty())
                 .toList();
     }
 
@@ -207,7 +220,7 @@ public class GroupServiceImpl implements IGroupService {
         }
 
         // Aplicar filtros
-        return all.stream()
+        List<GroupDTO> filtered = all.stream()
                 .filter(dto -> {
                     boolean matchesLevel = !hasLevelFilter ||
                             (dto.getIdLevel() != null && idLevels.contains(dto.getIdLevel()));
@@ -223,6 +236,14 @@ public class GroupServiceImpl implements IGroupService {
 
                     return matchesLevel && matchesDocente && matchesSubject && matchesProgram;
                 })
+                .toList();
+
+        // Cargar horarios para todos los grupos
+        loadSchedulesForDTOs(filtered);
+
+        // Filtrar grupos que no tienen horarios
+        return filtered.stream()
+                .filter(dto -> dto.getScheduleList() != null && !dto.getScheduleList().isEmpty())
                 .toList();
     }
 
@@ -510,10 +531,111 @@ public class GroupServiceImpl implements IGroupService {
         dto.setProgramName((String) row[13]);
         dto.setEscuela((String) row[14]);
 
-        // La vista no incluye horarios; dejamos la lista vacía para mantener la forma del DTO.
+        // La vista no incluye horarios; se cargarán después
         dto.setScheduleList(List.of());
 
         return dto;
+    }
+
+    /**
+     * Carga los horarios para una lista de GroupDTOs desde sus schemas correspondientes.
+     * Agrupa los grupos por schema para optimizar las consultas.
+     *
+     * @param groupDTOs Lista de DTOs a los que se les cargarán los horarios
+     */
+    private void loadSchedulesForDTOs(List<GroupDTO> groupDTOs) {
+        if (groupDTOs == null || groupDTOs.isEmpty()) {
+            return;
+        }
+
+        // Agrupar grupos por schema (programCode)
+        Map<String, List<GroupDTO>> groupsBySchema = groupDTOs.stream()
+                .filter(dto -> dto.getProgramCode() != null)
+                .collect(Collectors.groupingBy(GroupDTO::getProgramCode));
+
+        // Para cada schema, cargar horarios en batch
+        groupsBySchema.forEach((programCode, dtos) -> {
+            String schema = getSchemaFromProgramCode(programCode);
+            if (schema != null) {
+                List<Long> groupIds = dtos.stream()
+                        .map(GroupDTO::getId)
+                        .filter(id -> id != null)
+                        .collect(Collectors.toList());
+
+                if (!groupIds.isEmpty()) {
+                    Map<Long, List<ScheduleDTO>> schedulesMap = getSchedulesFromSchema(groupIds, schema);
+                    // Asignar horarios a cada DTO
+                    dtos.forEach(dto -> {
+                        List<ScheduleDTO> schedules = schedulesMap.getOrDefault(dto.getId(), List.of());
+                        dto.setScheduleList(schedules);
+                    });
+                }
+            }
+        });
+    }
+
+    /**
+     * Obtiene el nombre del schema a partir del código del programa.
+     * Valida que el schema sea uno de los permitidos para seguridad.
+     *
+     * @param programCode Código del programa (ej: "ing_sistemas")
+     * @return Nombre del schema (ej: "ing_sistemas") o null si no es válido
+     */
+    private String getSchemaFromProgramCode(String programCode) {
+        if (programCode == null) {
+            return null;
+        }
+        // Validar que el schema sea uno de los permitidos
+        List<String> validSchemas = List.of(
+                "ing_biomedica",
+                "ing_ciencia_de_datos",
+                "ing_inteligencia_artificial",
+                "ing_sistemas"
+        );
+        return validSchemas.contains(programCode) ? programCode : null;
+    }
+
+    /**
+     * Obtiene los horarios de múltiples grupos desde un schema específico usando consulta nativa.
+     *
+     * @param groupIds Lista de IDs de grupos
+     * @param schema   Nombre del schema (ej: "ing_sistemas")
+     * @return Mapa de groupId -> Lista de ScheduleDTO
+     */
+    private Map<Long, List<ScheduleDTO>> getSchedulesFromSchema(List<Long> groupIds, String schema) {
+        if (groupIds == null || groupIds.isEmpty() || schema == null) {
+            return Map.of();
+        }
+
+        // Construir la consulta nativa
+        String sql = String.format(
+                "SELECT id, id_group, EXTRACT(HOUR FROM start_time)::int AS hour, day_of_week " +
+                "FROM %s.schedule " +
+                "WHERE id_group IN (:groupIds)",
+                schema
+        );
+
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("groupIds", groupIds);
+
+        @SuppressWarnings("unchecked")
+        List<Object[]> results = query.getResultList();
+
+        // Mapear resultados a ScheduleDTO agrupados por id_group
+        return results.stream()
+                .collect(Collectors.groupingBy(
+                        row -> getLong(row[1]), // id_group
+                        Collectors.mapping(
+                                row -> {
+                                    Long id = getLong(row[0]);
+                                    Integer hour = row[2] != null ? ((Number) row[2]).intValue() : null;
+                                    String dayStr = (String) row[3];
+                                    DayOfWeekEnum day = dayStr != null ? DayOfWeekEnum.valueOf(dayStr) : null;
+                                    return new ScheduleDTO(id, hour, day);
+                                },
+                                Collectors.toList()
+                        )
+                ));
     }
 
     private Long getLong(Object value) {
