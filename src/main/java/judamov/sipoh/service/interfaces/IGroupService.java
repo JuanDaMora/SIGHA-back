@@ -41,7 +41,7 @@ public interface IGroupService {
     List<GroupDTO> getAllByFiltersAllPrograms(List<Long> idLevels,
                                               List<Long> docentesIds,
                                               List<Long> subjectIds,
-                                              List<String> programCodes,
+                                              List<Long> programIds,
                                               Long adminId,
                                               Long semesterId);
 }

@@ -186,7 +186,7 @@ public class GroupServiceImpl implements IGroupService {
     public List<GroupDTO> getAllByFiltersAllPrograms(List<Long> idLevels,
                                                      List<Long> docentesIds,
                                                      List<Long> subjectIds,
-                                                     List<String> programCodes,
+                                                     List<Long> programIds,
                                                      Long adminId,
                                                      Long semesterId) {
         validateAdminAccess(adminId);
@@ -196,28 +196,30 @@ public class GroupServiceImpl implements IGroupService {
                 .map(this::mapRowToGroupDTO)
                 .toList();
 
-        boolean noLevelFilter    = (idLevels == null || idLevels.isEmpty());
-        boolean noDocenteFilter  = (docentesIds == null || docentesIds.isEmpty());
-        boolean noSubjectFilter  = (subjectIds == null || subjectIds.isEmpty());
-        boolean noProgramFilter  = (programCodes == null || programCodes.isEmpty());
+        // Si no hay ningún filtro, devolver todos los grupos
+        boolean hasLevelFilter = idLevels != null && !idLevels.isEmpty();
+        boolean hasDocenteFilter = docentesIds != null && !docentesIds.isEmpty();
+        boolean hasSubjectFilter = subjectIds != null && !subjectIds.isEmpty();
+        boolean hasProgramFilter = programIds != null && !programIds.isEmpty();
 
-        if (noLevelFilter && noDocenteFilter && noSubjectFilter && noProgramFilter) {
+        if (!hasLevelFilter && !hasDocenteFilter && !hasSubjectFilter && !hasProgramFilter) {
             return all;
         }
 
+        // Aplicar filtros
         return all.stream()
                 .filter(dto -> {
-                    boolean matchesLevel = noLevelFilter ||
+                    boolean matchesLevel = !hasLevelFilter ||
                             (dto.getIdLevel() != null && idLevels.contains(dto.getIdLevel()));
 
-                    boolean matchesDocente = noDocenteFilter ||
+                    boolean matchesDocente = !hasDocenteFilter ||
                             (dto.getIdDocente() != null && docentesIds.contains(dto.getIdDocente()));
 
-                    boolean matchesSubject = noSubjectFilter ||
+                    boolean matchesSubject = !hasSubjectFilter ||
                             (dto.getIdSubject() != null && subjectIds.contains(dto.getIdSubject()));
 
-                    boolean matchesProgram = noProgramFilter ||
-                            (dto.getProgramCode() != null && programCodes.contains(dto.getProgramCode()));
+                    boolean matchesProgram = !hasProgramFilter ||
+                            (dto.getProgramId() != null && programIds.contains(dto.getProgramId()));
 
                     return matchesLevel && matchesDocente && matchesSubject && matchesProgram;
                 })
@@ -503,9 +505,10 @@ public class GroupServiceImpl implements IGroupService {
         dto.setCode((String) row[8]);
         dto.setMax_students((String) row[9]);
         dto.setEnrolled((String) row[10]);
-        dto.setProgramCode((String) row[11]);
-        dto.setProgramName((String) row[12]);
-        dto.setEscuela((String) row[13]);
+        dto.setProgramId(getLong(row[11]));
+        dto.setProgramCode((String) row[12]);
+        dto.setProgramName((String) row[13]);
+        dto.setEscuela((String) row[14]);
 
         // La vista no incluye horarios; dejamos la lista vacía para mantener la forma del DTO.
         dto.setScheduleList(List.of());
