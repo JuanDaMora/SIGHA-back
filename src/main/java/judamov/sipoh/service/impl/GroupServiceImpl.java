@@ -209,14 +209,20 @@ public class GroupServiceImpl implements IGroupService {
                 .map(this::mapRowToGroupDTO)
                 .toList();
 
-        // Si no hay ningún filtro, devolver todos los grupos
+        // Cargar horarios para todos los grupos primero
+        loadSchedulesForDTOs(all);
+
+        // Si no hay ningún filtro, devolver todos los grupos (con horarios cargados)
         boolean hasLevelFilter = idLevels != null && !idLevels.isEmpty();
         boolean hasDocenteFilter = docentesIds != null && !docentesIds.isEmpty();
         boolean hasSubjectFilter = subjectIds != null && !subjectIds.isEmpty();
         boolean hasProgramFilter = programIds != null && !programIds.isEmpty();
 
         if (!hasLevelFilter && !hasDocenteFilter && !hasSubjectFilter && !hasProgramFilter) {
-            return all;
+            // Filtrar grupos que no tienen horarios
+            return all.stream()
+                    .filter(dto -> dto.getScheduleList() != null && !dto.getScheduleList().isEmpty())
+                    .toList();
         }
 
         // Aplicar filtros
@@ -237,9 +243,6 @@ public class GroupServiceImpl implements IGroupService {
                     return matchesLevel && matchesDocente && matchesSubject && matchesProgram;
                 })
                 .toList();
-
-        // Cargar horarios para todos los grupos
-        loadSchedulesForDTOs(filtered);
 
         // Filtrar grupos que no tienen horarios
         return filtered.stream()
