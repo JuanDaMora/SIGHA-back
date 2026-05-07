@@ -44,3 +44,28 @@ docker compose down -v
 docker compose up --build
 
 ```
+
+---
+
+## Tests
+
+### Ejecutar todos los tests unitarios
+
+```bash
+mvn test
+```
+
+### Ver reporte de cobertura
+
+Después de ejecutar los tests, abrir en el navegador:
+```
+target/site/jacoco/index.html
+```
+
+### Documentación de testing
+
+| Documento | Descripción |
+|-----------|-------------|
+| [`src/docs/testing-strategy.md`](src/docs/testing-strategy.md) | Estrategia de testing: para qué sirven y qué tipos existen |
+| [`src/docs/how-to-run-tests.md`](src/docs/how-to-run-tests.md) | Guía completa de ejecución y lectura de resultados |
+| [`src/docs/pr-checklist.md`](src/docs/pr-checklist.md) | Convenciones y checklist para PRs con nuevos tests |
