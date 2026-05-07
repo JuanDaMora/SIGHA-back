@@ -1,0 +1,50 @@
+
+image: docker:27.3.1
+services:
+  - docker:dind
+stages:
+  - build
+  - push
+  - deploy
+variables:
+  WORKFLOW_STRATEGY: "gitflow"
+# ====================================================
+# INCLUSIÓN DE TEMPLATES
+# ====================================================
+include:
+  # build
+  - project: 'infraestructure/gitlab-ci-templates'
+    file: '/build/maven-build.yml'
+    ref: v4.0.5
+  # Docker Build
+  - project: 'infraestructure/gitlab-ci-templates'
+    file: '/docker/docker-push.yml'
+    ref: v4.0.5
+  # Deploy Trigger
+  - project: 'infraestructure/gitlab-ci-templates'
+    file: '/deploy/trigger-infra.yml'
+    ref: v4.0.5
+
+# =====================================================
+# CONFIGURACIÓN DEL DESPLIEGUE (REUSABLE)
+# =====================================================
+maven_build:
+  variables:
+    MAVEN_IMAGE_TAG: "maven:3.9-eclipse-temurin-21"
+trigger_deploy:
+  extends: .trigger-infra
+  variables:
+    APP_NETWORKS: "nginx-network SIGHA-internal-net"
+    SECRET_NAME: "SIGHA-infra"
+    APP_VARS: |
+      - SPRING_DATASOURCE_URL
+      - SPRING_DATASOURCE_USERNAME
+      - SPRING_DATASOURCE_PASSWORD
+      - DEFAULT_SCHEMA_SISTEMAS
+      - APP_SECRET_KEY
+      - SPRING_MAIL_HOST
+      - SPRING_MAIL_PORT
+      - SPRING_MAIL_USERNAME
+      - SPRING_MAIL_PASSWORD
+      - EMAIL_FAKE_DESTINATION
+      - SIGHA_URL_ACCESS
