@@ -13,6 +13,7 @@ import judamov.sipoh.repository.*;
 import judamov.sipoh.service.interfaces.IGroupService;
 import judamov.sipoh.service.interfaces.IScheduleService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GroupServiceImpl implements IGroupService {
@@ -115,8 +117,10 @@ public class GroupServiceImpl implements IGroupService {
         validateAdminAccess(adminId);
 
         Semester semester = semesterRepository.findById(semesterId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND,
-                        "El semestre con id " + semesterId + " no existe"));
+                .orElseThrow(() -> {
+                    log.warn("Semestre no encontrado con id={}", semesterId);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Semestre no encontrado");
+                });
 
         // 1. Traer todos los grupos del semestre
         List<Group> groups = groupRepository.findBySemester(semester);
@@ -261,7 +265,10 @@ public class GroupServiceImpl implements IGroupService {
     public List<GroupDTO> getAllByLevels(List<Long> idLevels, Long adminId, Long semesterId) {
         validateAdminAccess(adminId);
         Semester semester= semesterRepository.findById(semesterId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "El semestre con id "+semesterId+" no existe"));
+                .orElseThrow(() -> {
+                    log.warn("Semestre no encontrado con id={}", semesterId);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Semestre no encontrado");
+                });
 
         List<Group> groups = groupRepository.findBySemester(semester).stream()
                 .filter(group -> group.getSubject() != null &&
@@ -284,12 +291,21 @@ public class GroupServiceImpl implements IGroupService {
         validateAdminAccess(adminId);
 
         Subject subject = subjectRepository.findById(subjectId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Materia no encontrada"));
+                .orElseThrow(() -> {
+                    log.warn("Materia no encontrada con id={}", subjectId);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Materia no encontrada");
+                });
         Semester semester= semesterRepository.findById(semesterId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "El semestre con id "+semesterId+" no existe"));
+                .orElseThrow(() -> {
+                    log.warn("Semestre no encontrado con id={}", semesterId);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Semestre no encontrado");
+                });
 
         List<Group> groups = groupRepository.findBySubjectAndSemester(subject,semester)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "No hay grupos para esta materia"));
+                .orElseThrow(() -> {
+                    log.warn("No hay grupos para subjectId={} en semesterId={}", subjectId, semesterId);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "No hay grupos para la materia en el semestre indicado");
+                });
 
         return mapWithSchedules(groups);
     }
@@ -307,10 +323,16 @@ public class GroupServiceImpl implements IGroupService {
 
         User docente = getUserById(docenteId);
         Semester semester= semesterRepository.findById(semesterId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "El semestre con id "+semesterId+" no existe"));
+                .orElseThrow(() -> {
+                    log.warn("Semestre no encontrado con id={}", semesterId);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Semestre no encontrado");
+                });
 
         List<Group> groups = groupRepository.findByDocenteAndSemester(docente,semester)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "El docente no tiene grupos asignados"));
+                .orElseThrow(() -> {
+                    log.warn("Docente id={} no tiene grupos en semesterId={}", docenteId, semesterId);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "El docente no tiene grupos asignados en el semestre indicado");
+                });
 
         return mapWithSchedules(groups);
     }
@@ -328,15 +350,24 @@ public class GroupServiceImpl implements IGroupService {
         validateAdminAccess(adminId);
 
         Subject subject = subjectRepository.findById(dto.getIdSubject())
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Materia no encontrada"));
+                .orElseThrow(() -> {
+                    log.warn("Materia no encontrada con id={}", dto.getIdSubject());
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Materia no encontrada");
+                });
 
         Semester semester = semesterRepository.findById(semesterId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Semestre no encontrado"));
+                .orElseThrow(() -> {
+                    log.warn("Semestre no encontrado con id={}", semesterId);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Semestre no encontrado");
+                });
 
         User docente = null;
         if (dto.getIdDocente() != null) {
             docente = userRepository.findById(dto.getIdDocente())
-                    .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+                    .orElseThrow(() -> {
+                        log.warn("Docente no encontrado con id={}", dto.getIdDocente());
+                        return new GenericAppException(HttpStatus.NOT_FOUND, "Docente no encontrado");
+                    });
         }
         //Validar conflicto de horarios ANTES de crear el grupo y los schedules
         validateDocenteScheduleConflict(docente, semester, dto.getScheduleList(), null);
@@ -364,22 +395,29 @@ public class GroupServiceImpl implements IGroupService {
     public Boolean updateDocente(Long groupId,Long idDocente, Long adminId){
         validateAdminAccess(adminId);
         Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Grupo no encontrado"));
+                .orElseThrow(() -> {
+                    log.warn("Grupo no encontrado con id={}", groupId);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Grupo no encontrado");
+                });
 
         try {
             if (idDocente == null) {
-                // Quitar el docente del grupo si no se proporciona
                 group.setDocente(null);
             } else {
-                // Asignar nuevo docente
                 User newDocente = userRepository.findById(idDocente)
-                        .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Docente no encontrado"));
+                        .orElseThrow(() -> {
+                            log.warn("Docente no encontrado con id={}", idDocente);
+                            return new GenericAppException(HttpStatus.NOT_FOUND, "Docente no encontrado");
+                        });
                 group.setDocente(newDocente);
             }
 
             groupRepository.save(group);
+        } catch (GenericAppException e) {
+            throw e;
         } catch (Exception e) {
-            throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR, "Error al actualizar el docente en el grupo " + group.getCode());
+            log.error("Error al actualizar docente en grupo id={} código={}", groupId, group.getCode(), e);
+            throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR, "Error al actualizar el grupo");
         }
         return true;
     }
@@ -396,13 +434,22 @@ public class GroupServiceImpl implements IGroupService {
         validateAdminAccess(adminId);
 
         Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Grupo no encontrado"));
+                .orElseThrow(() -> {
+                    log.warn("Grupo no encontrado con id={}", groupId);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Grupo no encontrado");
+                });
 
         Subject subject = subjectRepository.findById(dto.getIdSubject())
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Materia no encontrada"));
+                .orElseThrow(() -> {
+                    log.warn("Materia no encontrada con id={}", dto.getIdSubject());
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Materia no encontrada");
+                });
 
         Semester semester = semesterRepository.findById(semesterId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Semestre no encontrado"));
+                .orElseThrow(() -> {
+                    log.warn("Semestre no encontrado con id={}", semesterId);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Semestre no encontrado");
+                });
 
         User docente = (dto.getIdDocente() != null) ? getUserById(dto.getIdDocente()) : null;
 
@@ -434,7 +481,10 @@ public class GroupServiceImpl implements IGroupService {
     public Boolean deleteGroup(Long groupId, Long adminId){
         validateAdminAccess(adminId);
         Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Grupo no encontrado"));
+                .orElseThrow(() -> {
+                    log.warn("Grupo no encontrado con id={}", groupId);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Grupo no encontrado");
+                });
         scheduleService.deleteSceduleByGroup(group,adminId);
         groupRepository.delete(group);
         return true;
@@ -448,7 +498,8 @@ public class GroupServiceImpl implements IGroupService {
     private void validateAdminAccess(Long userId) {
         User user = getUserById(userId);
         if (!userRolService.hasAdminPrivileges(user)) {
-            throw new GenericAppException(HttpStatus.UNAUTHORIZED, "No autorizado para esta solicitud");
+            log.warn("Acceso denegado: userId={} no tiene privilegios de administrador", userId);
+            throw new GenericAppException(HttpStatus.FORBIDDEN, "No tiene permisos para realizar esta solicitud");
         }
     }
 
@@ -460,7 +511,10 @@ public class GroupServiceImpl implements IGroupService {
      */
     public User getUserById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+                .orElseThrow(() -> {
+                    log.warn("Usuario no encontrado con id={}", userId);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
+                });
     }
 
     /**
@@ -677,11 +731,13 @@ public class GroupServiceImpl implements IGroupService {
     public Boolean deleteAllGroupsBySemesterId(Long userId, Long semesterId){
         validateAdminAccess(userId);
         Semester semester = semesterRepository.findById(semesterId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Semestre no encontrado"));
+                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND,
+                        "Semestre no encontrado con id: " + semesterId));
 
         List<Group> groupList = groupRepository.findBySemester(semester);
         if (groupList.isEmpty()) {
-            throw new GenericAppException(HttpStatus.NOT_FOUND, "No se encontraron grupos en el semestre");
+            throw new GenericAppException(HttpStatus.NOT_FOUND,
+                    "No se encontraron grupos en el semestre con id: " + semesterId);
         } else {
 
             // Primero eliminar schedules

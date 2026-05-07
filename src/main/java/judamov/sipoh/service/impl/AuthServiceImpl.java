@@ -4,6 +4,8 @@ import jakarta.transaction.Transactional;
 import judamov.sipoh.dto.*;
 import judamov.sipoh.entity.*;
 import judamov.sipoh.exceptions.GenericAppException;
+import judamov.sipoh.entity.Role;
+import judamov.sipoh.entity.Area;
 import judamov.sipoh.mappers.UserMapper;
 import judamov.sipoh.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -87,8 +89,10 @@ public class AuthServiceImpl {
      */
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findOneByDocumento(request.getDocumento())
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND,
-                        "Usuario no encontrado con documento: " + request.getDocumento()));
+                .orElseThrow(() -> {
+                    log.warn("Intento de login con documento no registrado={}", request.getDocumento());
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
+                });
 
         try {
             authenticationManager.authenticate(
@@ -109,8 +113,11 @@ public class AuthServiceImpl {
         }
 
         AccessControl accessControl= accessControlRepository.findOneByUser(user)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND,
-                        "Access control no econtrado"));
+                .orElseThrow(() -> {
+                    log.error("Registro de acceso no encontrado para userId={}", user.getId());
+                    return new GenericAppException(HttpStatus.NOT_FOUND,
+                            "No se encontró el registro de acceso del usuario");
+                });
         accessControl.setLastLogin(new Date());
         accessControlRepository.save(accessControl);
 
@@ -126,16 +133,13 @@ public class AuthServiceImpl {
      * @return respuesta con la contraseña (sin encriptar)
      */
     public RegisterResponse register(RegisterRequest request, Long userId) {
-        User admin = userRepository.findOneById(userId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.BAD_REQUEST, "Bad Request"));
-
-        if (!userRolService.hasAdminPrivileges(admin)) {
-            throw new GenericAppException(HttpStatus.UNAUTHORIZED, "Usuario no autorizado");
-        }
+        validateAdminAccess(userId);
 
         TypeDocument typeDocument = typeDocumentRepository.findOneById(request.getIdTipoDocumento())
-                .orElseThrow(() -> new GenericAppException(HttpStatus.BAD_REQUEST,
-                        "Tipo de documento no encontrado con id: " + request.getIdTipoDocumento()));
+                .orElseThrow(() -> {
+                    log.warn("Tipo de documento no encontrado con id={}", request.getIdTipoDocumento());
+                    return new GenericAppException(HttpStatus.BAD_REQUEST, "Tipo de documento no encontrado");
+                });
 
         userRepository.findOneByDocumento(request.getDocumento()).ifPresent(u -> {
             throw new GenericAppException(HttpStatus.BAD_REQUEST,
@@ -158,32 +162,38 @@ public class AuthServiceImpl {
                 .build();
 
         Program program = getCurrentProgram();
-        List<UserRol> userRoles = request.getIdsRoles().stream().map(roleId -> {
+            List<UserRol> userRoles = request.getIdsRoles().stream().map(roleId -> {
             Role role = roleRepository.findOneById(roleId)
-                    .orElseThrow(() -> new GenericAppException(HttpStatus.BAD_REQUEST,
-                            "Rol no encontrado con id: " + roleId));
+                    .orElseThrow(() -> {
+                        log.warn("Rol no encontrado con id={}", roleId);
+                        return new GenericAppException(HttpStatus.BAD_REQUEST, "Rol no encontrado");
+                    });
             return new UserRol(null, user, role, program, null, null);
         }).collect(Collectors.toList());
 
         user.setUserRoles(userRoles);
 
         try {
-            User savedUser = userRepository.save(user); // Ya creado previamente
+            User savedUser = userRepository.save(user);
 
             String fullName = savedUser.getFirstName() + " " + savedUser.getLastName();
 
             EmailRequestDTO emailDTO = EmailRequestDTO.builder()
                     .nombre(fullName)
                     .documento(savedUser.getDocumento())
-                    .password(request.getPassword()) // asegúrate de conservar la password generada
-                    .email(request.getEmail()) // o correoInstitucional, según tu lógica
-                    .fake(false) // o true si quieres simular
+                    .password(request.getPassword())
+                    .email(request.getEmail())
+                    .fake(false)
                     .build();
 
             emailService.sendEmail(emailDTO);
 
+        } catch (GenericAppException e) {
+            throw e;
         } catch (Exception e) {
-            throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR, "Error inesperado al guardar el usuario");
+            log.error("Error al registrar usuario con documento={}", request.getDocumento(), e);
+            throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error al registrar el usuario");
         }
 
         // Asociar áreas si vienen en la solicitud
@@ -206,7 +216,9 @@ public class AuthServiceImpl {
             accessControlRepository.save(newAccessControl);
 
         } catch (Exception e) {
-            throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR, "Error inesperado al guardar el access control");
+            log.error("Error al registrar control de acceso para usuario documento={}", request.getDocumento(), e);
+            throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error al registrar el control de acceso del usuario");
         }
 
 
@@ -222,8 +234,10 @@ public class AuthServiceImpl {
      */
     public ChangePasswordResponse changePassword(ChangePasswordDTO request) {
         User user = userRepository.findOneByDocumento(request.getDocumento())
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND,
-                        "Usuario no encontrado con documento: " + request.getDocumento()));
+                .orElseThrow(() -> {
+                    log.warn("Usuario no encontrado al cambiar contraseña, documento={}", request.getDocumento());
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
+                });
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getDocumento(), request.getLastPassword()));
@@ -249,15 +263,9 @@ public class AuthServiceImpl {
      * @return objeto {@link UserDTO} con datos, áreas y login
      */
     public UserDTO getUserById(Long id, Long userId) {
-        User requester = userRepository.findOneById(userId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.UNAUTHORIZED, "Usuario no autenticado"));
+        validateAdminAccess(userId);
 
-        if (!userRolService.hasAdminPrivileges(requester)) {
-            throw new GenericAppException(HttpStatus.UNAUTHORIZED, "No autorizado para consultar esta información");
-        }
-
-        User user = userRepository.findOneById(id)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        User user = getUserById(id);
 
         // Filtrar roles por programa actual
         Program currentProgram = getCurrentProgram();
@@ -291,7 +299,10 @@ public class AuthServiceImpl {
                 .orElse(new ArrayList<>());
 
         User user = userRepository.findOneById(userId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+                .orElseThrow(() -> {
+                    log.warn("Usuario no encontrado con id={}", userId);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
+                });
 
         UserDTO userDTO = UserMapper.userToUserDTO(user, userRolesForProgram);
 
@@ -317,19 +328,16 @@ public class AuthServiceImpl {
      */
     @Transactional
     public Boolean updateUser(Long adminId, Long id, UserDTO userDTO) {
-        User admin = userRepository.findOneById(adminId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        validateAdminAccess(adminId);
 
-        User user = userRepository.findOneById(id)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
-
-        if (!userRolService.hasAdminPrivileges(admin)) {
-            throw new GenericAppException(HttpStatus.UNAUTHORIZED, "No autorizado para actualizar este usuario");
-        }
+        User user = getUserById(id);
 
         // Actualizar campos básicos
         TypeDocument typeDocument = typeDocumentRepository.findById(userDTO.getIdTipoDocumento())
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Tipo de documento no encontrado"));
+                .orElseThrow(() -> {
+                    log.warn("Tipo de documento no encontrado con id={}", userDTO.getIdTipoDocumento());
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Tipo de documento no encontrado");
+                });
 
         user.setEmail(userDTO.getEmail());
         user.setDocumento(userDTO.getDocumento());
@@ -342,6 +350,10 @@ public class AuthServiceImpl {
         if (userDTO.getIdsRoles() != null) {
             List<Role> roles = roleRepository.findAllById(userDTO.getIdsRoles());
             if (roles.size() != userDTO.getIdsRoles().size()) {
+                List<Long> foundRoleIds = roles.stream().map(Role::getId).toList();
+                List<Long> missingRoleIds = userDTO.getIdsRoles().stream()
+                        .filter(rid -> !foundRoleIds.contains(rid)).toList();
+                log.warn("Roles inexistentes en la solicitud: {}", missingRoleIds);
                 throw new GenericAppException(HttpStatus.BAD_REQUEST, "Uno o más roles no existen");
             }
 
@@ -361,6 +373,10 @@ public class AuthServiceImpl {
         if (userDTO.getIdAreas() != null) {
             List<Area> areas = areaRepository.findAllById(userDTO.getIdAreas());
             if (areas.size() != userDTO.getIdAreas().size()) {
+                List<Long> foundAreaIds = areas.stream().map(Area::getId).toList();
+                List<Long> missingAreaIds = userDTO.getIdAreas().stream()
+                        .filter(aid -> !foundAreaIds.contains(aid)).toList();
+                log.warn("Áreas inexistentes en la solicitud: {}", missingAreaIds);
                 throw new GenericAppException(HttpStatus.BAD_REQUEST, "Una o más áreas no existen");
             }
 
@@ -378,7 +394,8 @@ public class AuthServiceImpl {
         try {
             userRepository.save(user);
         } catch (Exception e) {
-            throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR, "Error actualizando el usuario");
+            log.error("Error al actualizar usuario id={}", id, e);
+            throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR, "Error al actualizar el usuario");
         }
 
         return true;
@@ -386,27 +403,28 @@ public class AuthServiceImpl {
 @Transactional
     public Boolean updateUserMe (Long userId,UserBasicUpdateDTO userDTO){
         User user = userRepository.findOneById(userId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+                .orElseThrow(() -> {
+                    log.warn("Usuario no encontrado con id={}", userId);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
+                });
 
         TypeDocument typeDoc = typeDocumentRepository.findById(userDTO.getIdTipoDocumento())
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Tipo de documento no encontrado"));
+                .orElseThrow(() -> {
+                    log.warn("Tipo de documento no encontrado con id={}", userDTO.getIdTipoDocumento());
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Tipo de documento no encontrado");
+                });
         UserMapper.updateUserBasicFields(user, userDTO, typeDoc);
         try {
             userRepository.save(user);
         } catch (Exception e) {
-            throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Error actualizando el usuario");
+            log.error("Error al actualizar usuario id={}", userId, e);
+            throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR, "Error al actualizar el usuario");
         }
         return true;
     }
     @Transactional
     public Boolean registerBulkUsers(Long userId, List<BulkUserDTO> usuariosDTO, Boolean isFakeEmail) {
-        User admin = userRepository.findOneById(userId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.UNAUTHORIZED, "Usuario no autenticado"));
-
-        if (!userRolService.hasAdminPrivileges(admin)) {
-            throw new GenericAppException(HttpStatus.UNAUTHORIZED, "No autorizado para actualizar este usuario");
-        }
+        validateAdminAccess(userId);
 
         for (BulkUserDTO dto : usuariosDTO) {
             if (dto.getDocumento() == null || dto.getDocumento().isBlank()) continue;
@@ -421,10 +439,17 @@ public class AuthServiceImpl {
                     : List.of(3L); // por defecto, rol docente
 
             TypeDocument tipoDocumento = typeDocumentRepository.findById(tipoDocId)
-                    .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Tipo de documento no encontrado con id: " + tipoDocId));
+                    .orElseThrow(() -> {
+                        log.warn("Tipo de documento no encontrado con id={}", tipoDocId);
+                        return new GenericAppException(HttpStatus.NOT_FOUND, "Tipo de documento no encontrado");
+                    });
 
             List<Role> roles = roleRepository.findAllById(idsRoles);
             if (roles.size() != idsRoles.size()) {
+                List<Long> foundRoleIds = roles.stream().map(Role::getId).toList();
+                List<Long> missingRoleIds = idsRoles.stream()
+                        .filter(rid -> !foundRoleIds.contains(rid)).toList();
+                log.warn("Roles inexistentes en carga masiva para documento={}: {}", dto.getDocumento(), missingRoleIds);
                 throw new GenericAppException(HttpStatus.BAD_REQUEST, "Uno o más roles no existen");
             }
 
@@ -454,6 +479,10 @@ public class AuthServiceImpl {
             if (dto.getIdAreas() != null && !dto.getIdAreas().isEmpty()) {
                 List<Area> areas = areaRepository.findAllById(dto.getIdAreas());
                 if (areas.size() != dto.getIdAreas().size()) {
+                    List<Long> foundAreaIds = areas.stream().map(Area::getId).toList();
+                    List<Long> missingAreaIds = dto.getIdAreas().stream()
+                            .filter(aid -> !foundAreaIds.contains(aid)).toList();
+                    log.warn("Áreas inexistentes en carga masiva para documento={}: {}", dto.getDocumento(), missingAreaIds);
                     throw new GenericAppException(HttpStatus.BAD_REQUEST, "Una o más áreas no existen");
                 }
                 userAreas = areas.stream()
@@ -492,11 +521,36 @@ public class AuthServiceImpl {
     }
     
     /**
+     * Obtiene un usuario por su ID o lanza excepción si no existe.
+     */
+    private User getUserById(Long userId) {
+        return userRepository.findOneById(userId)
+                .orElseThrow(() -> {
+                    log.warn("Usuario no encontrado con id={}", userId);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
+                });
+    }
+
+    /**
+     * Verifica que el usuario tenga privilegios de administrador.
+     */
+    private void validateAdminAccess(Long userId) {
+        User user = getUserById(userId);
+        if (!userRolService.hasAdminPrivileges(user)) {
+            log.warn("Acceso denegado: userId={} no tiene privilegios de administrador", userId);
+            throw new GenericAppException(HttpStatus.FORBIDDEN, "No tiene permisos para realizar esta solicitud");
+        }
+    }
+
+    /**
      * Obtiene el Program correspondiente al schema actual configurado
      */
     private Program getCurrentProgram() {
         return programRepository.findByCode(currentSchema)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR,
-                        "Programa no encontrado para el schema: " + currentSchema));
+                .orElseThrow(() -> {
+                    log.error("Programa no encontrado para schema={}", currentSchema);
+                    return new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR,
+                            "Error de configuración: programa no encontrado");
+                });
     }
 }

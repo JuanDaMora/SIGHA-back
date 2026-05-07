@@ -13,11 +13,13 @@ import judamov.sipoh.repository.IUserRepository;
 import judamov.sipoh.service.interfaces.IGroupService;
 import judamov.sipoh.service.interfaces.IScheduleService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
+@Slf4j
 @Service
 public class ScheduleServiceImpl implements IScheduleService {
     private final IScheduleRepository scheduleRepository;
@@ -44,7 +46,10 @@ public class ScheduleServiceImpl implements IScheduleService {
         validateAdminAccess(adminId);
 
         Group group = groupRepository.findById(dto.getIdGroup())
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Grupo no encontrado"));
+                .orElseThrow(() -> {
+                    log.warn("Grupo no encontrado con id={}", dto.getIdGroup());
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Grupo no encontrado");
+                });
 
         // Borrar horarios previos del grupo
         scheduleRepository.findByGroup(group)
@@ -91,7 +96,8 @@ public class ScheduleServiceImpl implements IScheduleService {
     private void validateAdminAccess(Long userId) {
         User user = getUserById(userId);
         if (!userRolService.hasAdminPrivileges(user)) {
-            throw new GenericAppException(HttpStatus.UNAUTHORIZED, "No autorizado para esta solicitud");
+            log.warn("Acceso denegado: userId={} no tiene privilegios de administrador", userId);
+            throw new GenericAppException(HttpStatus.FORBIDDEN, "No tiene permisos para realizar esta solicitud");
         }
     }
 
@@ -103,7 +109,10 @@ public class ScheduleServiceImpl implements IScheduleService {
      */
     public User getUserById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+                .orElseThrow(() -> {
+                    log.warn("Usuario no encontrado con id={}", userId);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
+                });
     }
 
 }

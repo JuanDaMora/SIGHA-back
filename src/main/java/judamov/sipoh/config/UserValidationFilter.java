@@ -42,7 +42,7 @@ public class UserValidationFilter extends OncePerRequestFilter {
                     String tokenUserId = jwtService.getUserIdFromToken(token).toString();
 
                     if (!headerUserId.equals(tokenUserId)) {
-                        throw new GenericAppException(HttpStatus.UNAUTHORIZED, "El userId del header no coincide con el token");
+                        throw new GenericAppException(HttpStatus.FORBIDDEN, "El userId del header no coincide con el token");
                     }
                 }
             }

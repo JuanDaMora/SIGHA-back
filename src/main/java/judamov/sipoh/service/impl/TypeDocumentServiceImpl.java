@@ -11,12 +11,14 @@ import judamov.sipoh.repository.ISiglaRepository;
 import judamov.sipoh.repository.ITypeDocumentRepository;
 import judamov.sipoh.service.interfaces.ITypeDocumentService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TypeDocumentServiceImpl  implements ITypeDocumentService {
@@ -45,8 +47,10 @@ public class TypeDocumentServiceImpl  implements ITypeDocumentService {
         newTypeDocument.setDescription(typeDocumentDTO.getDescription().toUpperCase());
         if (typeDocumentDTO.getIdSigla() != null) {
             Sigla sigla = siglaRepository.findOneById(typeDocumentDTO.getIdSigla())
-                    .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND,
-                            "La sigla con el id: " + typeDocumentDTO.getIdSigla() + " no existe"));
+                    .orElseThrow(() -> {
+                        log.warn("Sigla no encontrada con id={}", typeDocumentDTO.getIdSigla());
+                        return new GenericAppException(HttpStatus.NOT_FOUND, "Sigla no encontrada");
+                    });
             newTypeDocument.setSigla(sigla);
         }else if (typeDocumentDTO.getSigla() != null) {
 
@@ -64,8 +68,9 @@ public class TypeDocumentServiceImpl  implements ITypeDocumentService {
 
                 newTypeDocument.setSigla(sigla);
             } catch (Exception e) {
+                log.error("Error al guardar tipo de documento con sigla='{}'", typeDocumentDTO.getSigla(), e);
                 throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR,
-                        "Error inesperado al guardar el Tipo de Documento y Sigla nueva");
+                        "Error al guardar el tipo de documento");
             }
         }
         else {
@@ -76,7 +81,8 @@ public class TypeDocumentServiceImpl  implements ITypeDocumentService {
         try {
             typeDocumentRepository.save(newTypeDocument);
         } catch (Exception e) {
-            throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR, "Error inesperado al guardar el Tipo de Documento");
+            log.error("Error al guardar tipo de documento descripción='{}'", typeDocumentDTO.getDescription(), e);
+            throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR, "Error al guardar el tipo de documento");
         }
         return true;
     }
@@ -84,26 +90,27 @@ public class TypeDocumentServiceImpl  implements ITypeDocumentService {
     @Override
     public Boolean updateTypeDocument(Long id, TypeDocumentDTO typeDocumentDTO){
         TypeDocument typeDocument=typeDocumentRepository.findOneById(id)
-                .orElseThrow(()-> new GenericAppException(HttpStatus.NOT_FOUND,
-                        "No se encuentra el Tipo documento con id: "+id)
-                );
+                .orElseThrow(()-> {
+                    log.warn("Tipo de documento no encontrado con id={}", id);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Tipo de documento no encontrado");
+                });
         if(typeDocumentDTO.getIdSigla()== null || typeDocumentDTO.getDescription().isEmpty()){
             throw new GenericAppException(HttpStatus.BAD_REQUEST,
                     "Es necesario enviar la descripcion y el Id Sigla");
         }
         typeDocument.setDescription(typeDocumentDTO.getDescription());
         Sigla sigla=siglaRepository.findOneById(typeDocumentDTO.getIdSigla())
-                        .orElseThrow(()-> new GenericAppException(HttpStatus.BAD_REQUEST,
-                                "No se encontro la sigla con el id: "+typeDocumentDTO.getIdSigla())
-                        );
+                        .orElseThrow(()-> {
+                            log.warn("Sigla no encontrada con id={}", typeDocumentDTO.getIdSigla());
+                            return new GenericAppException(HttpStatus.BAD_REQUEST, "Sigla no encontrada");
+                        });
 
         typeDocument.setSigla(sigla);
         try{
             typeDocumentRepository.save(typeDocument);
         }catch (Exception e){
-            throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Error al actualizar el tipo de documento");
-
+            log.error("Error al actualizar tipo de documento id={}", id, e);
+            throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR, "Error al actualizar el tipo de documento");
         }
         return true;
 

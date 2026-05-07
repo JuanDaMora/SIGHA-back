@@ -10,11 +10,13 @@ import judamov.sipoh.repository.ISemesterRepository;
 import judamov.sipoh.repository.IUserRepository;
 import judamov.sipoh.service.interfaces.IIndividualAvailabilityService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class IndividualAvailabilityImpl implements IIndividualAvailabilityService {
@@ -46,7 +48,7 @@ public class IndividualAvailabilityImpl implements IIndividualAvailabilityServic
             }
         }
 
-        saveAvailability(availability, "Error al guardar la disponibilidad individual");
+        saveAvailability(availability, docenteId, semesterId);
 
         return toDTO(availability);
     }
@@ -59,7 +61,9 @@ public class IndividualAvailabilityImpl implements IIndividualAvailabilityServic
 
         IndividualAvailability availability = findUniqueAvailability(semester, docente);
         if (availability == null) {
-            throw new GenericAppException(HttpStatus.NOT_FOUND, "No existe disponibilidad individual");
+            log.warn("No existe disponibilidad individual para docenteId={} en semesterId={}", docenteId, semesterId);
+            throw new GenericAppException(HttpStatus.NOT_FOUND,
+                    "No existe disponibilidad individual para el docente en el semestre indicado");
         }
 
         return toDTO(availability);
@@ -70,14 +74,19 @@ public class IndividualAvailabilityImpl implements IIndividualAvailabilityServic
     /** Obtener usuario sin validar rol docente (usado en controller) */
     public User getUserById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+                .orElseThrow(() -> {
+                    log.warn("Usuario no encontrado con id={}", userId);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
+                });
     }
 
     /** Obtener semestre por id (usado en controller) */
     public Semester getSemester(Long semesterId) {
         return semesterRepository.findById(semesterId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND,
-                        "El semestre con id " + semesterId + " no existe"));
+                .orElseThrow(() -> {
+                    log.warn("Semestre no encontrado con id={}", semesterId);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Semestre no encontrado");
+                });
     }
 
     // ------------------- Métodos privados -------------------
@@ -85,7 +94,8 @@ public class IndividualAvailabilityImpl implements IIndividualAvailabilityServic
     private User getValidatedTeacher(Long userId) {
         User user = getUserById(userId);
         if (!userRolService.hasTeacherPrivileges(user)) {
-            throw new GenericAppException(HttpStatus.UNAUTHORIZED, "El usuario no es un docente");
+            log.warn("userId={} no tiene rol de docente", userId);
+            throw new GenericAppException(HttpStatus.FORBIDDEN, "El usuario no tiene rol de docente");
         }
         return user;
     }
@@ -93,7 +103,8 @@ public class IndividualAvailabilityImpl implements IIndividualAvailabilityServic
     private void validateAdminAccess(Long adminId) {
         User admin = getUserById(adminId);
         if (!userRolService.hasAdminPrivileges(admin)) {
-            throw new GenericAppException(HttpStatus.UNAUTHORIZED, "No autorizado para esta solicitud");
+            log.warn("Acceso denegado: userId={} no tiene privilegios de administrador", adminId);
+            throw new GenericAppException(HttpStatus.FORBIDDEN, "No tiene permisos para realizar esta solicitud");
         }
     }
 
@@ -104,17 +115,21 @@ public class IndividualAvailabilityImpl implements IIndividualAvailabilityServic
             return null;
         }
         if (list.size() > 1) {
+            log.error("Inconsistencia de datos: userId={} tiene {} registros de disponibilidad individual en semesterId={}",
+                    user.getId(), list.size(), semester.getId());
             throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "El usuario tiene más de una disponibilidad individual");
+                    "Error de consistencia en la disponibilidad individual del docente");
         }
         return list.get(0);
     }
 
-    private void saveAvailability(IndividualAvailability availability, String errorMessage) {
+    private void saveAvailability(IndividualAvailability availability, Long docenteId, Long semesterId) {
         try {
             individualAvailabilityRepository.save(availability);
         } catch (Exception e) {
-            throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR, errorMessage);
+            log.error("Error al guardar disponibilidad individual para docenteId={} en semesterId={}", docenteId, semesterId, e);
+            throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error al guardar la disponibilidad individual del docente");
         }
     }
 

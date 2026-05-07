@@ -13,9 +13,11 @@ import judamov.sipoh.repository.ISubjectRepository;
 import judamov.sipoh.repository.IUserRepository;
 import judamov.sipoh.service.interfaces.ISubjectService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SubjectServiceImpl implements ISubjectService {
@@ -33,9 +35,15 @@ public class SubjectServiceImpl implements ISubjectService {
         validateAdminAccess(adminId);
 
         Area area= areaRepository.findById(subjectCreateDTO.getIdArea())
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Area no encontrada"));
+                .orElseThrow(() -> {
+                    log.warn("Área no encontrada con id={}", subjectCreateDTO.getIdArea());
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Área no encontrada");
+                });
         LevelSubject levelSubject= levelSubjectRepository.findById(subjectCreateDTO.getIdLevel())
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Nivel subject no encontrado"));
+                .orElseThrow(() -> {
+                    log.warn("Nivel académico no encontrado con id={}", subjectCreateDTO.getIdLevel());
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Nivel académico no encontrado");
+                });
         Subject newSubject= Subject.builder()
                 .codigo(subjectCreateDTO.getCode())
                 .levelSubject(levelSubject)
@@ -45,7 +53,8 @@ public class SubjectServiceImpl implements ISubjectService {
         try{
             subjectRepository.save(newSubject);
         }catch (Exception e){
-            throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR, "Error creando la asignatura");
+            log.error("Error al crear asignatura nombre='{}'", subjectCreateDTO.getName(), e);
+            throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR, "Error al crear la asignatura");
         }
         return true;
     }
@@ -58,7 +67,8 @@ public class SubjectServiceImpl implements ISubjectService {
     private void validateAdminAccess(Long userId) {
         User user = getUserById(userId);
         if (!userRolService.hasAdminPrivileges(user)) {
-            throw new GenericAppException(HttpStatus.UNAUTHORIZED, "No autorizado para esta solicitud");
+            log.warn("Acceso denegado: userId={} no tiene privilegios de administrador", userId);
+            throw new GenericAppException(HttpStatus.FORBIDDEN, "No tiene permisos para realizar esta solicitud");
         }
     }
 
@@ -70,7 +80,10 @@ public class SubjectServiceImpl implements ISubjectService {
      */
     public User getUserById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+                .orElseThrow(() -> {
+                    log.warn("Usuario no encontrado con id={}", userId);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
+                });
     }
     @Override
     @Transactional
@@ -78,13 +91,22 @@ public class SubjectServiceImpl implements ISubjectService {
         validateAdminAccess(adminId);
 
         Subject subject = subjectRepository.findById(subjectId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Asignatura no encontrada"));
+                .orElseThrow(() -> {
+                    log.warn("Asignatura no encontrada con id={}", subjectId);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Asignatura no encontrada");
+                });
 
         Area area = areaRepository.findById(dto.getIdArea())
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Área no encontrada"));
+                .orElseThrow(() -> {
+                    log.warn("Área no encontrada con id={}", dto.getIdArea());
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Área no encontrada");
+                });
 
         LevelSubject levelSubject = levelSubjectRepository.findById(dto.getIdLevel())
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Nivel no encontrado"));
+                .orElseThrow(() -> {
+                    log.warn("Nivel académico no encontrado con id={}", dto.getIdLevel());
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Nivel académico no encontrado");
+                });
 
         subject.setCodigo(dto.getCode());
         subject.setName(dto.getName());
@@ -94,7 +116,8 @@ public class SubjectServiceImpl implements ISubjectService {
         try {
             subjectRepository.save(subject);
         } catch (Exception e) {
-            throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR, "Error actualizando la asignatura");
+            log.error("Error al actualizar asignatura id={}", subjectId, e);
+            throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR, "Error al actualizar la asignatura");
         }
 
         return true;

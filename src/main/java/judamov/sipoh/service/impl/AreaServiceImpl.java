@@ -11,6 +11,7 @@ import judamov.sipoh.repository.IAreaRepository;
 import judamov.sipoh.repository.ISubjectRepository;
 import judamov.sipoh.service.interfaces.IAreaService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AreaServiceImpl  implements IAreaService {
@@ -64,7 +66,8 @@ public class AreaServiceImpl  implements IAreaService {
     public Boolean createArea(AreaDTO areaDTO) {
         areaRepository.findOneByDescription(areaDTO.getDescription().toUpperCase())
                 .ifPresent(u -> {
-                    throw new GenericAppException(HttpStatus.BAD_REQUEST, "El area ya existe");
+                    throw new GenericAppException(HttpStatus.BAD_REQUEST,
+                            "Ya existe un área con la descripción indicada");
                 });
 
         Area newArea = Area.builder()
@@ -73,7 +76,8 @@ public class AreaServiceImpl  implements IAreaService {
         try {
             areaRepository.save(newArea);
         } catch (Exception e) {
-            throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR, "Error inesperado al guardar el Area");
+            log.error("Error al guardar nueva área con descripción '{}'", areaDTO.getDescription(), e);
+            throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR, "Error al guardar el área");
         }
 
         return true;
@@ -82,16 +86,16 @@ public class AreaServiceImpl  implements IAreaService {
     @Override
     public Boolean updateArea(Long idArea, AreaDTO areaDTO){
         Area area=areaRepository.findOneById(idArea)
-                .orElseThrow(
-                        ()-> new GenericAppException(HttpStatus.NOT_FOUND,
-                                "No se encontro el area con id: "+areaDTO.getId())
-                );
+                .orElseThrow(() -> {
+                    log.warn("Área no encontrada con id={}", idArea);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Área no encontrada");
+                });
         area.setDescription(areaDTO.getDescription());
         try{
             areaRepository.save(area);
         }catch (Exception e){
-            throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Error al actualizar el area con id: "+ areaDTO.getId());
+            log.error("Error al actualizar área id={}", idArea, e);
+            throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR, "Error al actualizar el área");
         }
         return true;
     }

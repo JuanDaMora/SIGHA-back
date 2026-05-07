@@ -10,6 +10,7 @@ import judamov.sipoh.notifications.TemplateProcessor;
 import judamov.sipoh.repository.IEmailRepository;
 import judamov.sipoh.repository.IUserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmailServiceImpl {
@@ -40,12 +42,7 @@ public class EmailServiceImpl {
     private final PasswordEncoder passwordEncoder;
 
     public Boolean sendEmail(Long userId, EmailRequestDTO emailRequestDTO) {
-        User user = getUserById(userId);
-
-        if (!userRolService.hasAdminPrivileges(user)) {
-            throw new GenericAppException(HttpStatus.UNAUTHORIZED, "No autorizado para enviar correos");
-        }
-
+        validateAdminAccess(userId);
         return sendEmail(emailRequestDTO);
     }
 
@@ -69,7 +66,10 @@ public class EmailServiceImpl {
 
     public Boolean sendRecoveryPassword(String documento, boolean isFake) {
         User user = userRepository.findOneByDocumento(documento)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+                .orElseThrow(() -> {
+                    log.warn("Usuario no encontrado al recuperar contraseña, documento={}", documento);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
+                });
 
         // 1. Generar nueva contraseña
         String newPassword = generateRandomPassword();
@@ -119,14 +119,18 @@ public class EmailServiceImpl {
             return true;
 
         } catch (MessagingException e) {
+            log.error("Error al enviar correo a destino={}", emailDestino, e);
             throw new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Error al enviar el correo: " + e.getMessage());
+                    "No se pudo enviar el correo. Intente de nuevo más tarde.");
         }
     }
 
     private User getUserById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+                .orElseThrow(() -> {
+                    log.warn("Usuario no encontrado con id={}", userId);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
+                });
     }
 
     private String generateRandomPassword() {
@@ -144,7 +148,8 @@ public class EmailServiceImpl {
     private void validateAdminAccess(Long userId) {
         User user = getUserById(userId);
         if (!userRolService.hasAdminPrivileges(user)) {
-            throw new GenericAppException(HttpStatus.UNAUTHORIZED, "No autorizado para esta solicitud");
+            log.warn("Acceso denegado: userId={} no tiene privilegios de administrador", userId);
+            throw new GenericAppException(HttpStatus.FORBIDDEN, "No tiene permisos para realizar esta solicitud");
         }
     }
 }

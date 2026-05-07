@@ -71,6 +71,14 @@ public class AvailabilityController {
         return ResponseEntity.ok(availabilityService.createAvailability(userId,semesterId,availabilityDTO));
     }
 
+    @PutMapping("/{availabilityId}")
+    public ResponseEntity<Boolean> updateAvailabilityStatus(
+            @PathVariable Long availabilityId,
+            @RequestParam Long newStatusId
+    ) {
+        return ResponseEntity.ok(availabilityService.updateAvailabilityStatus(availabilityId, newStatusId));
+    }
+
     // ----------------- INDIVIDUAL AVAILABILITY -----------------
 
 

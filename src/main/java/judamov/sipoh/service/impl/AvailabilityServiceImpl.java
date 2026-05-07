@@ -10,6 +10,7 @@ import judamov.sipoh.exceptions.GenericAppException;
 import judamov.sipoh.repository.*;
 import judamov.sipoh.service.interfaces.IAvailabilityService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
  * Servicio que gestiona la disponibilidad horaria de los docentes.
  * Incluye lógica de creación, eliminación, y consulta de disponibilidad por semestre.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AvailabilityServiceImpl implements IAvailabilityService {
@@ -59,6 +61,7 @@ public class AvailabilityServiceImpl implements IAvailabilityService {
         List<Subject> subjects = subjectRepository.findAllById(subjectIds);
 
         if (subjects.isEmpty()) {
+            log.warn("No se encontraron asignaturas para los ids={}", subjectIds);
             throw new GenericAppException(HttpStatus.NOT_FOUND,
                     "No se encontraron asignaturas para los IDs enviados");
         }
@@ -172,7 +175,8 @@ public class AvailabilityServiceImpl implements IAvailabilityService {
     private void validateAdminAccess(Long userId) {
         User user = getUserById(userId);
         if (!userRolService.hasAdminPrivileges(user)) {
-            throw new GenericAppException(HttpStatus.UNAUTHORIZED, "No autorizado para esta solicitud");
+            log.warn("Acceso denegado: userId={} no tiene privilegios de administrador", userId);
+            throw new GenericAppException(HttpStatus.FORBIDDEN, "No tiene permisos para realizar esta solicitud");
         }
     }
 
@@ -204,19 +208,29 @@ public class AvailabilityServiceImpl implements IAvailabilityService {
     @Override
     public User getUserById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+                .orElseThrow(() -> {
+                    log.warn("Usuario no encontrado con id={}", userId);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
+                });
     }
 
     @Override
     public Semester getSemesterById(Long semesterId) {
         return semesterRepository.findById(semesterId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Semestre no encontrado"));
+                .orElseThrow(() -> {
+                    log.warn("Semestre no encontrado con id={}", semesterId);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Semestre no encontrado");
+                });
     }
 
     @Override
     public StatusAvailability getDefaultStatus() {
         return statusAvailabilityRepository.findById(1L)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND, "Estado por defecto no encontrado"));
+                .orElseThrow(() -> {
+                    log.error("Estado de disponibilidad por defecto (id=1) no está configurado en base de datos");
+                    return new GenericAppException(HttpStatus.NOT_FOUND,
+                            "Estado de disponibilidad por defecto no está configurado");
+                });
     }
 
     @Override
@@ -280,8 +294,10 @@ public class AvailabilityServiceImpl implements IAvailabilityService {
 
                 StatusAvailability status = (block.getStatusId() != null)
                         ? statusAvailabilityRepository.findById(block.getStatusId())
-                        .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND,
-                                "Estado no encontrado: " + block.getStatusId()))
+                        .orElseThrow(() -> {
+                            log.warn("Estado de disponibilidad no encontrado con id={}", block.getStatusId());
+                            return new GenericAppException(HttpStatus.NOT_FOUND, "Estado de disponibilidad no encontrado");
+                        })
                         : defaultStatus;
 
                 availability.setStatusAvailability(status);
@@ -293,13 +309,16 @@ public class AvailabilityServiceImpl implements IAvailabilityService {
     public Boolean updateAvailabilityStatus(Long availabilityId, Long newStatusId) {
         // Buscar el bloque de disponibilidad por ID
         Availability availability = availabilityRepository.findById(availabilityId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND,
-                        "Disponibilidad no encontrada con ID: " + availabilityId));
+                .orElseThrow(() -> {
+                    log.warn("Disponibilidad no encontrada con id={}", availabilityId);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Disponibilidad no encontrada");
+                });
 
-        // Buscar el nuevo estado por ID
         StatusAvailability newStatus = statusAvailabilityRepository.findById(newStatusId)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.NOT_FOUND,
-                        "Estado no encontrado con ID: " + newStatusId));
+                .orElseThrow(() -> {
+                    log.warn("Estado de disponibilidad no encontrado con id={}", newStatusId);
+                    return new GenericAppException(HttpStatus.NOT_FOUND, "Estado de disponibilidad no encontrado");
+                });
 
         // Actualizar el estado y guardar
         availability.setStatusAvailability(newStatus);
@@ -309,8 +328,11 @@ public class AvailabilityServiceImpl implements IAvailabilityService {
     
     private Program getCurrentProgram() {
         return programRepository.findByCode(currentSchema)
-                .orElseThrow(() -> new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR,
-                        "Programa no encontrado para el schema: " + currentSchema));
+                .orElseThrow(() -> {
+                    log.error("Programa no encontrado para el schema={}", currentSchema);
+                    return new GenericAppException(HttpStatus.INTERNAL_SERVER_ERROR,
+                            "Error de configuración: programa no encontrado");
+                });
     }
 
 }
