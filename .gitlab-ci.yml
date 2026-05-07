@@ -48,3 +48,5 @@ trigger_deploy:
       - SPRING_MAIL_PASSWORD
       - EMAIL_FAKE_DESTINATION
       - SIGHA_URL_ACCESS
+      - CLIENT_ID_SIGHA
+      - CLIENT_SECRET_SIGHA
