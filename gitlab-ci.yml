@@ -15,15 +15,15 @@ include:
   # build
   - project: 'infraestructure/gitlab-ci-templates'
     file: '/build/maven-build.yml'
-    ref: v4.0.5
+    ref: v4.0.6
   # Docker Build
   - project: 'infraestructure/gitlab-ci-templates'
     file: '/docker/docker-push.yml'
-    ref: v4.0.5
+    ref: v4.0.6
   # Deploy Trigger
   - project: 'infraestructure/gitlab-ci-templates'
     file: '/deploy/trigger-infra.yml'
-    ref: v4.0.5
+    ref: v4.0.6
 
 # =====================================================
 # CONFIGURACIÓN DEL DESPLIEGUE (REUSABLE)
