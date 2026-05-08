@@ -37,6 +37,7 @@ ON CONFLICT DO NOTHING;
 ```
 mvn clean package -DskipTests
 
+
 docker build -t sigha-back .
 
 docker compose down -v
